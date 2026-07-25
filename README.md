@@ -38,7 +38,8 @@ Current implementation includes:
 - Web app password setup stored locally in the browser
 - Web app bookmark create, list, search, filter, edit, and delete flows
 - Firefox-friendly browser extension for saving the current tab
-- Initial Vitest coverage for API behavior
+- Vitest coverage for API behavior, auth, CORS, validation, pagination, and tag filtering
+- Accessibility polish for web and extension status messages
 - Production deployment on Cloudflare Workers
 - Local secret example
 
@@ -226,7 +227,7 @@ Current web features:
 - Add bookmarks
 - List recent bookmarks
 - Search bookmarks
-- Filter by tag
+- Filter by exact tag
 - Edit bookmark URL, title, description, and tags
 - Delete bookmarks with confirmation
 - Show loading, empty, success, and error states
@@ -360,5 +361,5 @@ Error response:
 
 ## Known Limitations
 
-- Tag filtering uses simple SQL matching against JSON-encoded tags for the first version.
+- Search uses simple SQL `LIKE` matching for the first version.
 - Firefox Android extension support may require later packaging/distribution work.

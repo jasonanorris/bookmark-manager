@@ -263,8 +263,10 @@ function buildListQuery(options: ListOptions): { sql: string; bindings: unknown[
   }
 
   if (options.tag) {
-    whereClauses.push("tags LIKE ? ESCAPE '\\'");
-    bindings.push(`%${escapeLike(options.tag)}%`);
+    whereClauses.push(
+      "EXISTS (SELECT 1 FROM json_each(bookmarks.tags) WHERE lower(json_each.value) = lower(?))"
+    );
+    bindings.push(options.tag);
   }
 
   const whereSql =

@@ -134,6 +134,7 @@ function setBusy(isBusy: boolean): void {
 function showStatus(message: string, type: "error" | "success" | "neutral"): void {
   status.textContent = message;
   status.className = type === "neutral" ? "status" : `status ${type}`;
+  status.setAttribute("role", type === "error" ? "alert" : "status");
 }
 
 function getErrorMessage(error: unknown): string {

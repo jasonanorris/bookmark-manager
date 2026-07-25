@@ -85,11 +85,12 @@ class TestD1Database {
       );
     }
 
-    if (sql.includes(" AND tags LIKE") || (!sql.includes("title LIKE") && sql.includes("tags LIKE"))) {
-      const tag = cleanLikeBinding(String(bindings[bindingIndex]));
-      results = results.filter((bookmark) =>
-        bookmark.tags.toLowerCase().includes(tag)
-      );
+    if (sql.includes("json_each(bookmarks.tags)")) {
+      const tag = String(bindings[bindingIndex]).toLocaleLowerCase();
+      results = results.filter((bookmark) => {
+        const tags = parseStoredTags(bookmark.tags);
+        return tags.some((storedTag) => storedTag.toLocaleLowerCase() === tag);
+      });
     }
 
     return results
@@ -195,6 +196,13 @@ function createTestEnv(): Env {
   };
 }
 
+function createUnconfiguredAuthEnv(): Env {
+  return {
+    ...createTestEnv(),
+    EXTENSION_API_TOKEN: ""
+  };
+}
+
 function apiRequest(
   path: string,
   init: RequestInit = {},
@@ -222,6 +230,16 @@ function jsonBody(value: unknown): string {
 
 function cleanLikeBinding(value: string): string {
   return value.replace(/^%|%$/g, "").replace(/\\/g, "").toLowerCase();
+}
+
+function parseStoredTags(value: string): string[] {
+  const parsedValue = JSON.parse(value) as unknown;
+
+  if (!Array.isArray(parsedValue)) {
+    return [];
+  }
+
+  return parsedValue.filter((tag): tag is string => typeof tag === "string");
 }
 
 function createD1Result(lastRowId: number): D1Result {
@@ -291,6 +309,36 @@ describe("worker API", () => {
       }
     });
     expect(response.status).toBe(401);
+  });
+
+  it("rejects bookmark requests with the wrong password", async () => {
+    const response = await worker.fetch(
+      apiRequest("/api/bookmarks", {}, "wrong-token"),
+      createTestEnv()
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        code: "UNAUTHORIZED",
+        message: "A valid API password is required."
+      }
+    });
+    expect(response.status).toBe(401);
+  });
+
+  it("returns a configuration error when authentication is not configured", async () => {
+    const response = await worker.fetch(
+      apiRequest("/api/bookmarks"),
+      createUnconfiguredAuthEnv()
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        code: "CONFIGURATION_ERROR",
+        message: "API authentication is not configured."
+      }
+    });
+    expect(response.status).toBe(500);
   });
 
   it("creates a valid bookmark from a bare domain", async () => {
@@ -472,6 +520,88 @@ describe("worker API", () => {
     expect(body.bookmarks[0].title).toBe("Cloudflare Docs");
   });
 
+  it("filters tags with an exact case-insensitive match", async () => {
+    const env = createTestEnv();
+
+    await worker.fetch(
+      apiRequest("/api/bookmarks", {
+        method: "POST",
+        body: jsonBody({
+          url: "https://example.com/dev",
+          title: "Dev",
+          tags: ["Dev"]
+        })
+      }),
+      env
+    );
+    await worker.fetch(
+      apiRequest("/api/bookmarks", {
+        method: "POST",
+        body: jsonBody({
+          url: "https://example.com/development",
+          title: "Development",
+          tags: ["development"]
+        })
+      }),
+      env
+    );
+
+    const response = await worker.fetch(apiRequest("/api/bookmarks?tag=dev"), env);
+    const body = await readJson<ApiBookmarkListResponse>(response);
+
+    expect(body.bookmarks.map((bookmark) => bookmark.title)).toEqual(["Dev"]);
+  });
+
+  it("applies limit and offset pagination", async () => {
+    const env = createTestEnv();
+
+    await worker.fetch(
+      apiRequest("/api/bookmarks", {
+        method: "POST",
+        body: jsonBody({ url: "https://example.com/first", title: "First" })
+      }),
+      env
+    );
+    await worker.fetch(
+      apiRequest("/api/bookmarks", {
+        method: "POST",
+        body: jsonBody({ url: "https://example.com/second", title: "Second" })
+      }),
+      env
+    );
+    await worker.fetch(
+      apiRequest("/api/bookmarks", {
+        method: "POST",
+        body: jsonBody({ url: "https://example.com/third", title: "Third" })
+      }),
+      env
+    );
+
+    const response = await worker.fetch(
+      apiRequest("/api/bookmarks?limit=1&offset=1"),
+      env
+    );
+    const body = await readJson<ApiBookmarkListResponse>(response);
+
+    expect(body.bookmarks.map((bookmark) => bookmark.title)).toEqual(["Second"]);
+    expect(body.pagination).toEqual({ limit: 1, offset: 1, count: 1 });
+  });
+
+  it("rejects out-of-range pagination parameters", async () => {
+    const response = await worker.fetch(
+      apiRequest("/api/bookmarks?limit=101"),
+      createTestEnv()
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        code: "INVALID_QUERY",
+        message: "The limit parameter is out of range."
+      }
+    });
+    expect(response.status).toBe(400);
+  });
+
   it("updates a bookmark", async () => {
     const env = createTestEnv();
     const createResponse = await worker.fetch(
@@ -545,6 +675,21 @@ describe("worker API", () => {
     expect(response.status).toBe(400);
   });
 
+  it("rejects invalid bookmark IDs", async () => {
+    const response = await worker.fetch(
+      apiRequest("/api/bookmarks/not-a-number"),
+      createTestEnv()
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        code: "INVALID_ID",
+        message: "A valid bookmark ID is required."
+      }
+    });
+    expect(response.status).toBe(400);
+  });
+
   it("responds to CORS preflight requests from allowed origins", async () => {
     const response = await worker.fetch(
       new Request("https://example.com/api/bookmarks", {
@@ -577,5 +722,20 @@ describe("worker API", () => {
     expect(response.headers.get("access-control-allow-origin")).toBe(
       "moz-extension://example-extension-id"
     );
+  });
+
+  it("does not add CORS headers for unlisted web origins", async () => {
+    const response = await worker.fetch(
+      new Request("https://example.com/api/bookmarks", {
+        method: "OPTIONS",
+        headers: {
+          origin: "https://not-bookmarks.example.com"
+        }
+      }),
+      createTestEnv()
+    );
+
+    expect(response.status).toBe(204);
+    expect(response.headers.get("access-control-allow-origin")).toBeNull();
   });
 });

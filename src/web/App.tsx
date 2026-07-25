@@ -239,7 +239,11 @@ export function App(): JSX.Element {
               autoFocus
               disabled={isAuthenticating}
             />
-            {error ? <p className="form-message error">{error}</p> : null}
+            {error ? (
+              <p className="form-message error" role="alert">
+                {error}
+              </p>
+            ) : null}
             <button type="submit" disabled={isAuthenticating}>
               {isAuthenticating ? "Checking..." : "Unlock"}
             </button>
@@ -499,9 +503,17 @@ function StatusMessages({
   }
 
   return (
-    <div className="status-region" aria-live="polite">
-      {error ? <p className="form-message error">{error}</p> : null}
-      {notice ? <p className="form-message success">{notice}</p> : null}
+    <div className="status-region">
+      {error ? (
+        <p className="form-message error" role="alert">
+          {error}
+        </p>
+      ) : null}
+      {notice ? (
+        <p className="form-message success" role="status">
+          {notice}
+        </p>
+      ) : null}
     </div>
   );
 }
