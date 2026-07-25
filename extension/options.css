@@ -52,6 +52,12 @@ h1 {
   font-size: 2rem;
 }
 
+.app-version {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-weight: 700;
+}
+
 .settings-form {
   display: grid;
   gap: 12px;

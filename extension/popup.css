@@ -54,6 +54,13 @@ h1 {
   font-size: 1.35rem;
 }
 
+.app-version {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
 .bookmark-form,
 .notice-panel {
   display: grid;

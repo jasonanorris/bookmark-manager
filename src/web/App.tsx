@@ -22,6 +22,7 @@ const emptyForm: BookmarkFormState = {
   description: "",
   tags: ""
 };
+const appVersion = "0.1.0";
 
 export function App(): JSX.Element {
   const [token, setToken] = useState(() => loadStoredToken());
@@ -226,6 +227,7 @@ export function App(): JSX.Element {
         <section className="auth-panel" aria-labelledby="auth-title">
           <p className="eyebrow">Bookmark Manager</p>
           <h1 id="auth-title">Enter API Password</h1>
+          <p className="app-version">v{appVersion}</p>
           <form className="auth-form" onSubmit={handleTokenSubmit}>
             <label htmlFor="api-token">Password</label>
             <input
@@ -253,6 +255,7 @@ export function App(): JSX.Element {
         <div>
           <p className="eyebrow">Bookmark Manager</p>
           <h1>Bookmarks</h1>
+          <p className="app-version">v{appVersion}</p>
         </div>
         <div className="header-actions">
           <button type="button" className="secondary-button" onClick={() => loadBookmarks()}>
