@@ -57,6 +57,10 @@ export function corsHeaders(request: Request, env: Env): HeadersInit {
 }
 
 function isAllowedOrigin(origin: string, env: Env): boolean {
+  if (isExtensionOrigin(origin)) {
+    return true;
+  }
+
   const configuredOrigins = env.ALLOWED_ORIGINS?.split(",")
     .map((value) => value.trim())
     .filter((value) => value.length > 0);
@@ -69,3 +73,9 @@ function isAllowedOrigin(origin: string, env: Env): boolean {
   return allowedOrigins.includes(origin);
 }
 
+function isExtensionOrigin(origin: string): boolean {
+  return (
+    origin.startsWith("moz-extension://") ||
+    origin.startsWith("chrome-extension://")
+  );
+}

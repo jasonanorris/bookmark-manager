@@ -561,4 +561,21 @@ describe("worker API", () => {
       "https://bookmarks.example.com"
     );
   });
+
+  it("allows Firefox extension origins for CORS", async () => {
+    const response = await worker.fetch(
+      new Request("https://example.com/api/bookmarks", {
+        method: "OPTIONS",
+        headers: {
+          origin: "moz-extension://example-extension-id"
+        }
+      }),
+      createTestEnv()
+    );
+
+    expect(response.status).toBe(204);
+    expect(response.headers.get("access-control-allow-origin")).toBe(
+      "moz-extension://example-extension-id"
+    );
+  });
 });
