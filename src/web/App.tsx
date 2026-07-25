@@ -34,6 +34,7 @@ export function App(): JSX.Element {
   const [editForm, setEditForm] = useState<BookmarkFormState>(emptyForm);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
 
@@ -85,13 +86,21 @@ export function App(): JSX.Element {
         return;
       }
 
+      if (caughtError instanceof ApiError && caughtError.status === 401) {
+        clearStoredToken();
+        setToken("");
+        setBookmarks([]);
+        setError("Bad password.");
+        return;
+      }
+
       setError(getErrorMessage(caughtError));
     } finally {
       setIsLoading(false);
     }
   }
 
-  function handleTokenSubmit(event: FormEvent<HTMLFormElement>): void {
+  async function handleTokenSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     const cleanToken = tokenInput.trim();
 
@@ -100,10 +109,25 @@ export function App(): JSX.Element {
       return;
     }
 
-    saveStoredToken(cleanToken);
-    setToken(cleanToken);
-    setTokenInput("");
     setError("");
+    setIsAuthenticating(true);
+
+    try {
+      const response = await getBookmarks(cleanToken, { limit: 100 });
+      saveStoredToken(cleanToken);
+      setBookmarks(response.bookmarks);
+      setToken(cleanToken);
+      setTokenInput("");
+    } catch (caughtError) {
+      if (caughtError instanceof ApiError && caughtError.status === 401) {
+        setError("Bad password.");
+        return;
+      }
+
+      setError(getErrorMessage(caughtError));
+    } finally {
+      setIsAuthenticating(false);
+    }
   }
 
   function handleSignOut(): void {
@@ -211,9 +235,12 @@ export function App(): JSX.Element {
               onChange={(event) => setTokenInput(event.target.value)}
               autoComplete="current-password"
               autoFocus
+              disabled={isAuthenticating}
             />
             {error ? <p className="form-message error">{error}</p> : null}
-            <button type="submit">Unlock</button>
+            <button type="submit" disabled={isAuthenticating}>
+              {isAuthenticating ? "Checking..." : "Unlock"}
+            </button>
           </form>
         </section>
       </main>
