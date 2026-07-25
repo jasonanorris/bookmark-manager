@@ -24,14 +24,27 @@ const emptyForm: BookmarkFormState = {
   description: "",
   tags: ""
 };
-const appVersion = "0.1.2";
+const appVersion = "0.1.3";
+const themeStorageKey = "bookmark-manager-theme";
+
+type Theme = "dark" | "light";
+
+function loadStoredTheme(): Theme {
+  return window.localStorage.getItem(themeStorageKey) === "light" ? "light" : "dark";
+}
 
 export function App(): JSX.Element {
   const [token, setToken] = useState(() => loadStoredToken());
+  const [theme, setTheme] = useState<Theme>(() => loadStoredTheme());
   const [tokenInput, setTokenInput] = useState("");
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
   const [search, setSearch] = useState("");
   const [selectedTag, setSelectedTag] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [expandedBookmarkIds, setExpandedBookmarkIds] = useState<Set<number>>(
+    () => new Set()
+  );
   const [form, setForm] = useState<BookmarkFormState>(emptyForm);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<BookmarkFormState>(emptyForm);
@@ -43,6 +56,11 @@ export function App(): JSX.Element {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const importInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    window.localStorage.setItem(themeStorageKey, theme);
+  }, [theme]);
 
   const availableTags = useMemo(() => {
     const tags = new Map<string, string>();
@@ -147,6 +165,24 @@ export function App(): JSX.Element {
     setNotice("");
   }
 
+  function toggleTheme(): void {
+    setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark"));
+  }
+
+  function toggleBookmarkExpanded(bookmarkId: number): void {
+    setExpandedBookmarkIds((currentIds) => {
+      const nextIds = new Set(currentIds);
+
+      if (nextIds.has(bookmarkId)) {
+        nextIds.delete(bookmarkId);
+      } else {
+        nextIds.add(bookmarkId);
+      }
+
+      return nextIds;
+    });
+  }
+
   async function handleCreate(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     setIsSaving(true);
@@ -156,6 +192,7 @@ export function App(): JSX.Element {
     try {
       const response = await createBookmark(token, formToPayload(form));
       setForm(emptyForm);
+      setIsAddOpen(false);
       setNotice(response.created === false ? "Bookmark updated." : "Bookmark saved.");
       await loadBookmarks();
     } catch (caughtError) {
@@ -332,6 +369,32 @@ export function App(): JSX.Element {
           <button
             type="button"
             className="secondary-button"
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          >
+            {theme === "dark" ? "Light" : "Dark"}
+          </button>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => setIsSearchOpen((isOpen) => !isOpen)}
+            aria-expanded={isSearchOpen}
+            aria-controls="bookmark-search-panel"
+          >
+            {isSearchOpen ? "Hide Search" : search || selectedTag ? "Search Active" : "Search"}
+          </button>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={() => setIsAddOpen((isOpen) => !isOpen)}
+            aria-expanded={isAddOpen}
+            aria-controls="add-bookmark-panel"
+          >
+            {isAddOpen ? "Hide Add" : "Add"}
+          </button>
+          <button
+            type="button"
+            className="secondary-button"
             onClick={handleExport}
             disabled={isExporting || isImporting}
           >
@@ -361,44 +424,56 @@ export function App(): JSX.Element {
         </div>
       </header>
 
-      <section className="toolbar" aria-label="Bookmark filters">
-        <div className="field search-field">
-          <label htmlFor="search">Search</label>
-          <input
-            id="search"
-            type="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Title, URL, description, or tag"
-          />
-        </div>
-        <div className="field">
-          <label htmlFor="tag-filter">Tag</label>
-          <select
-            id="tag-filter"
-            value={selectedTag}
-            onChange={(event) => setSelectedTag(event.target.value)}
-          >
-            <option value="">All tags</option>
-            {availableTags.map((tag) => (
-              <option key={tag} value={tag}>
-                {tag}
-              </option>
-            ))}
-          </select>
-        </div>
-      </section>
+      {isSearchOpen ? (
+        <section
+          id="bookmark-search-panel"
+          className="toolbar"
+          aria-label="Bookmark filters"
+        >
+          <div className="field search-field">
+            <label htmlFor="search">Search</label>
+            <input
+              id="search"
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Title, URL, description, or tag"
+            />
+          </div>
+          <div className="field">
+            <label htmlFor="tag-filter">Tag</label>
+            <select
+              id="tag-filter"
+              value={selectedTag}
+              onChange={(event) => setSelectedTag(event.target.value)}
+            >
+              <option value="">All tags</option>
+              {availableTags.map((tag) => (
+                <option key={tag} value={tag}>
+                  {tag}
+                </option>
+              ))}
+            </select>
+          </div>
+        </section>
+      ) : null}
 
-      <section aria-labelledby="add-bookmark-title" className="form-section">
-        <h2 id="add-bookmark-title">Add Bookmark</h2>
-        <BookmarkForm
-          form={form}
-          submitLabel={isSaving ? "Saving..." : "Save Bookmark"}
-          onChange={setForm}
-          onSubmit={handleCreate}
-          disabled={isSaving}
-        />
-      </section>
+      {isAddOpen ? (
+        <section
+          id="add-bookmark-panel"
+          aria-labelledby="add-bookmark-title"
+          className="form-section"
+        >
+          <h2 id="add-bookmark-title">Add Bookmark</h2>
+          <BookmarkForm
+            form={form}
+            submitLabel={isSaving ? "Saving..." : "Save Bookmark"}
+            onChange={setForm}
+            onSubmit={handleCreate}
+            disabled={isSaving}
+          />
+        </section>
+      ) : null}
 
       <StatusMessages error={error} notice={notice} />
 
@@ -416,79 +491,101 @@ export function App(): JSX.Element {
         ) : null}
 
         <div className="bookmark-list">
-          {bookmarks.map((bookmark) => (
-            <article className="bookmark-card" key={bookmark.id}>
-              {editingId === bookmark.id ? (
-                <BookmarkForm
-                  form={editForm}
-                  submitLabel={isSaving ? "Saving..." : "Save Changes"}
-                  onChange={setEditForm}
-                  onSubmit={(event) => handleUpdate(event, bookmark.id)}
-                  onCancel={cancelEditing}
-                  disabled={isSaving}
-                />
-              ) : (
-                <>
-                  <div className="bookmark-main">
-                    <div>
-                      <h3>
+          {bookmarks.map((bookmark) => {
+            const isExpanded = expandedBookmarkIds.has(bookmark.id);
+
+            return (
+              <article className="bookmark-card" key={bookmark.id}>
+                {editingId === bookmark.id ? (
+                  <BookmarkForm
+                    form={editForm}
+                    submitLabel={isSaving ? "Saving..." : "Save Changes"}
+                    onChange={setEditForm}
+                    onSubmit={(event) => handleUpdate(event, bookmark.id)}
+                    onCancel={cancelEditing}
+                    disabled={isSaving}
+                  />
+                ) : (
+                  <>
+                    <div className="bookmark-compact">
+                      <div className="bookmark-summary">
+                        <h3>
+                          <a
+                            href={bookmark.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {displayTitle(bookmark)}
+                          </a>
+                        </h3>
                         <a
+                          className="bookmark-url"
                           href={bookmark.url}
                           target="_blank"
                           rel="noopener noreferrer"
                         >
-                          {displayTitle(bookmark)}
+                          {bookmark.url}
                         </a>
-                      </h3>
-                      <p className="bookmark-host">{formatHostname(bookmark.url)}</p>
+                      </div>
+                      <button
+                        type="button"
+                        className="secondary-button compact-toggle"
+                        onClick={() => toggleBookmarkExpanded(bookmark.id)}
+                        aria-expanded={isExpanded}
+                      >
+                        {isExpanded ? "Minimize" : "Maximize"}
+                      </button>
                     </div>
-                    <p className="bookmark-date">{formatDate(bookmark.createdAt)}</p>
-                  </div>
-                  <a
-                    className="bookmark-url"
-                    href={bookmark.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {bookmark.url}
-                  </a>
-                  {bookmark.description ? (
-                    <p className="bookmark-description">{bookmark.description}</p>
-                  ) : null}
-                  {bookmark.tags.length > 0 ? (
-                    <div className="tag-list" aria-label="Tags">
-                      {bookmark.tags.map((tag) => (
-                        <button
-                          key={tag}
-                          type="button"
-                          className="tag-button"
-                          onClick={() => setSelectedTag(tag)}
-                        >
-                          {tag}
-                        </button>
-                      ))}
-                    </div>
-                  ) : null}
-                  <div className="card-actions">
-                    <button
-                      type="button"
-                      className="secondary-button"
-                      onClick={() => startEditing(bookmark)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      className="danger-button"
-                      onClick={() => handleDelete(bookmark)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </>
-              )}
-            </article>
-          ))}
+
+                    {isExpanded ? (
+                      <div className="bookmark-details">
+                        <div className="bookmark-meta">
+                          <p className="bookmark-host">{formatHostname(bookmark.url)}</p>
+                          <p className="bookmark-date">{formatDate(bookmark.createdAt)}</p>
+                        </div>
+                        {bookmark.description ? (
+                          <p className="bookmark-description">{bookmark.description}</p>
+                        ) : null}
+                        {bookmark.tags.length > 0 ? (
+                          <div className="tag-list" aria-label="Tags">
+                            {bookmark.tags.map((tag) => (
+                              <button
+                                key={tag}
+                                type="button"
+                                className="tag-button"
+                                onClick={() => {
+                                  setSelectedTag(tag);
+                                  setIsSearchOpen(true);
+                                }}
+                              >
+                                {tag}
+                              </button>
+                            ))}
+                          </div>
+                        ) : null}
+                        <div className="card-actions">
+                          <button
+                            type="button"
+                            className="secondary-button"
+                            onClick={() => startEditing(bookmark)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            type="button"
+                            className="danger-button"
+                            onClick={() => handleDelete(bookmark)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+                  </>
+                )}
+              </article>
+            );
+          })}
         </div>
       </section>
     </main>

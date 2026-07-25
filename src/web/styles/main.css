@@ -1,11 +1,62 @@
 :root {
-  color: #18212f;
-  background: #f4f6f8;
+  color: #e8ecef;
+  background: #101113;
+  color-scheme: dark;
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  --page-bg: #101113;
+  --panel-bg: #181a1d;
+  --panel-muted: #202327;
+  --border: #30343a;
+  --border-strong: #454b54;
+  --text: #e8ecef;
+  --text-strong: #ffffff;
+  --muted: #a5adb8;
+  --accent: #2dd4bf;
+  --accent-strong: #14b8a6;
+  --accent-soft: #123a37;
+  --button-text: #081110;
+  --danger: #dc2626;
+  --danger-hover: #b91c1c;
+  --focus: #fbbf24;
+  --error-bg: #35151b;
+  --error-border: #7f1d1d;
+  --error-text: #fecdd3;
+  --success-bg: #10291d;
+  --success-border: #166534;
+  --success-text: #bbf7d0;
+  --shadow: 0 20px 45px rgba(0, 0, 0, 0.28);
+}
+
+:root[data-theme="light"] {
+  color: #18212f;
+  background: #f4f6f8;
+  color-scheme: light;
+  --page-bg: #f4f6f8;
+  --panel-bg: #ffffff;
+  --panel-muted: #eef2f7;
+  --border: #d9e2ec;
+  --border-strong: #cbd5e1;
+  --text: #18212f;
+  --text-strong: #0f172a;
+  --muted: #64748b;
+  --accent: #155e75;
+  --accent-strong: #0f4f63;
+  --accent-soft: #ecfeff;
+  --button-text: #ffffff;
+  --danger: #b91c1c;
+  --danger-hover: #991b1b;
+  --focus: #f59e0b;
+  --error-bg: #fff1f2;
+  --error-border: #fecdd3;
+  --error-text: #9f1239;
+  --success-bg: #f0fdf4;
+  --success-border: #bbf7d0;
+  --success-text: #166534;
+  --shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
 }
 
 * {
@@ -16,6 +67,8 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
+  background: var(--page-bg);
+  color: var(--text);
 }
 
 button,
@@ -38,7 +91,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 a:focus-visible {
-  outline: 3px solid #f59e0b;
+  outline: 3px solid var(--focus);
 }
 
 .visually-hidden {
@@ -54,15 +107,15 @@ button {
   min-height: 42px;
   border: 0;
   border-radius: 6px;
-  background: #155e75;
-  color: #ffffff;
+  background: var(--accent);
+  color: var(--button-text);
   cursor: pointer;
   font-weight: 700;
   padding: 0 16px;
 }
 
 button:hover {
-  background: #0f4f63;
+  background: var(--accent-strong);
 }
 
 button:disabled {
@@ -71,7 +124,7 @@ button:disabled {
 }
 
 label {
-  color: #334155;
+  color: var(--muted);
   font-size: 0.85rem;
   font-weight: 700;
 }
@@ -81,11 +134,15 @@ select,
 textarea {
   width: 100%;
   min-height: 42px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid var(--border-strong);
   border-radius: 6px;
-  background: #ffffff;
-  color: #111827;
+  background: var(--panel-bg);
+  color: var(--text);
   padding: 10px 12px;
+}
+
+input::placeholder {
+  color: var(--muted);
 }
 
 textarea {
@@ -108,11 +165,11 @@ textarea {
 
 .auth-panel {
   width: min(100%, 420px);
-  border: 1px solid #d9e2ec;
+  border: 1px solid var(--border);
   border-radius: 8px;
-  background: #ffffff;
+  background: var(--panel-bg);
   padding: 28px;
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow);
 }
 
 .auth-form,
@@ -131,7 +188,7 @@ textarea {
 .toolbar,
 .form-section,
 .list-section {
-  border-bottom: 1px solid #d9e2ec;
+  border-bottom: 1px solid var(--border);
   padding-bottom: 24px;
 }
 
@@ -167,7 +224,7 @@ textarea {
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #be123c;
+  color: var(--accent);
   font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0;
@@ -183,46 +240,47 @@ p {
 
 h1 {
   margin-bottom: 0;
-  color: #0f172a;
+  color: var(--text-strong);
   font-size: 2.15rem;
   line-height: 1.05;
 }
 
 .app-version {
   margin: 8px 0 0;
-  color: #64748b;
+  color: var(--muted);
   font-size: 0.86rem;
   font-weight: 700;
 }
 
 h2 {
   margin-bottom: 16px;
-  color: #172033;
+  color: var(--text-strong);
   font-size: 1.2rem;
 }
 
 h3 {
-  color: #172033;
+  color: var(--text-strong);
   font-size: 1.02rem;
   line-height: 1.35;
 }
 
 .secondary-button {
-  border: 1px solid #cbd5e1;
-  background: #ffffff;
-  color: #1f2937;
+  border: 1px solid var(--border-strong);
+  background: var(--panel-bg);
+  color: var(--text);
 }
 
 .secondary-button:hover {
-  background: #eef2f7;
+  background: var(--panel-muted);
 }
 
 .danger-button {
-  background: #b91c1c;
+  background: var(--danger);
+  color: #ffffff;
 }
 
 .danger-button:hover {
-  background: #991b1b;
+  background: var(--danger-hover);
 }
 
 .form-section {
@@ -253,15 +311,15 @@ h3 {
 }
 
 .error {
-  border: 1px solid #fecdd3;
-  background: #fff1f2;
-  color: #9f1239;
+  border: 1px solid var(--error-border);
+  background: var(--error-bg);
+  color: var(--error-text);
 }
 
 .success {
-  border: 1px solid #bbf7d0;
-  background: #f0fdf4;
-  color: #166534;
+  border: 1px solid var(--success-border);
+  background: var(--success-bg);
+  color: var(--success-text);
 }
 
 .status-region {
@@ -279,7 +337,7 @@ h3 {
 
 .section-heading p {
   margin: 0;
-  color: #64748b;
+  color: var(--muted);
   font-size: 0.92rem;
 }
 
@@ -290,17 +348,21 @@ h3 {
 
 .bookmark-card,
 .empty-state {
-  border: 1px solid #d9e2ec;
+  border: 1px solid var(--border);
   border-radius: 8px;
-  background: #ffffff;
-  padding: 18px;
+  background: var(--panel-bg);
+  padding: 14px;
 }
 
-.bookmark-main {
+.bookmark-compact {
   display: flex;
   gap: 14px;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
+}
+
+.bookmark-summary {
+  min-width: 0;
 }
 
 .bookmark-card h3 {
@@ -308,7 +370,7 @@ h3 {
 }
 
 .bookmark-card h3 a {
-  color: #0f4f63;
+  color: var(--text-strong);
   text-decoration-thickness: 2px;
   text-underline-offset: 3px;
 }
@@ -318,7 +380,7 @@ h3 {
 .bookmark-url,
 .bookmark-description,
 .empty-state p {
-  color: #64748b;
+  color: var(--muted);
 }
 
 .bookmark-host,
@@ -334,9 +396,20 @@ h3 {
 
 .bookmark-url {
   display: block;
-  margin-top: 12px;
   overflow-wrap: anywhere;
   font-size: 0.92rem;
+}
+
+.bookmark-details {
+  margin-top: 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+
+.bookmark-meta {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
 }
 
 .bookmark-description {
@@ -350,15 +423,20 @@ h3 {
 
 .tag-button {
   min-height: 32px;
-  border: 1px solid #99f6e4;
-  background: #ecfeff;
-  color: #155e75;
+  border: 1px solid var(--accent-strong);
+  background: var(--accent-soft);
+  color: var(--accent);
   font-size: 0.86rem;
   padding: 0 10px;
 }
 
 .tag-button:hover {
-  background: #cffafe;
+  background: var(--panel-muted);
+}
+
+.compact-toggle {
+  flex: 0 0 auto;
+  min-height: 36px;
 }
 
 .card-actions {
@@ -383,7 +461,8 @@ h3 {
 
   .app-header,
   .section-heading,
-  .bookmark-main {
+  .bookmark-compact,
+  .bookmark-meta {
     align-items: stretch;
     flex-direction: column;
   }
