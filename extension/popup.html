@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Save Bookmark</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup-shell">
+      <header>
+        <p class="eyebrow">Bookmark Manager</p>
+        <h1>Save Bookmark</h1>
+      </header>
+
+      <section id="setup-panel" class="notice-panel hidden">
+        <p>Set the API URL and password before saving bookmarks.</p>
+        <button id="open-options" type="button">Open Settings</button>
+      </section>
+
+      <form id="bookmark-form" class="bookmark-form">
+        <label for="title">Title</label>
+        <input id="title" name="title" type="text" maxlength="500" />
+
+        <label for="url">URL</label>
+        <input
+          id="url"
+          name="url"
+          type="text"
+          inputmode="url"
+          autocapitalize="none"
+          autocomplete="off"
+          required
+        />
+
+        <label for="description">Description</label>
+        <textarea id="description" name="description" rows="3" maxlength="5000"></textarea>
+
+        <label for="tags">Tags</label>
+        <input
+          id="tags"
+          name="tags"
+          type="text"
+          placeholder="reference, cloudflare"
+        />
+
+        <p id="status" class="status" role="status" aria-live="polite"></p>
+
+        <div class="actions">
+          <button id="save-button" type="submit">Save</button>
+          <button id="settings-button" class="secondary-button" type="button">Settings</button>
+        </div>
+      </form>
+    </main>
+    <script type="module" src="dist/popup.js"></script>
+  </body>
+</html>
+

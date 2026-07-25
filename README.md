@@ -18,7 +18,7 @@ The first version is a personal app. It will use one shared API password/token s
 
 ## Current Status
 
-Phase 2 includes the Worker API, D1 foundation, and usable web interface:
+Phase 3 includes the Worker API, D1 foundation, usable web interface, and Firefox-first browser extension:
 
 - npm project configuration
 - TypeScript configuration
@@ -31,10 +31,11 @@ Phase 2 includes the Worker API, D1 foundation, and usable web interface:
 - Duplicate URL upsert behavior
 - Web app password setup stored locally in the browser
 - Web app bookmark create, list, search, filter, edit, and delete flows
+- Firefox-friendly browser extension for saving the current tab
 - Initial Vitest coverage for API behavior
 - Local secret example
 
-The browser extension is planned next.
+Production deployment is planned next.
 
 ## Local Setup
 
@@ -78,6 +79,7 @@ For the web app to talk to the Worker API locally, open the Worker dev URL from 
 npm run typecheck
 npm run test
 npm run build
+npm run build:extension
 ```
 
 ## Cloudflare Setup
@@ -134,14 +136,47 @@ npm run deploy
 
 ## Browser Extension
 
-The extension is planned for a later phase. It will include:
+The extension is built for Firefox desktop first and uses the standard WebExtensions shape.
+
+Current extension features:
 
 - Popup save form
 - Options page for API URL and API password/token
 - Local settings storage
 - Current tab URL and title detection
+- Optional tags and description
+- Success and error feedback
+
+Build the extension scripts:
+
+```bash
+npm run build:extension
+```
+
+Load it temporarily in Firefox on Linux Mint:
+
+1. Open `about:debugging`.
+2. Select `This Firefox`.
+3. Select `Load Temporary Add-on`.
+4. Choose `extension/manifest.json`.
+
+For local development, open the extension settings and use:
+
+```text
+API URL: http://localhost:8787
+API Password: the value from .dev.vars
+```
+
+For production, use:
+
+```text
+API URL: https://bookmarks.radarapp.us
+API Password: your production EXTENSION_API_TOKEN value
+```
 
 The production token must be entered by the user in extension settings. It must not be committed in extension source code.
+
+Firefox on Android has more limited extension workflows. The web app at `https://bookmarks.radarapp.us` is expected to be the main phone experience.
 
 ## Web App
 
@@ -288,6 +323,6 @@ Error response:
 
 ## Known Limitations
 
-- Browser extension is not implemented yet.
 - `wrangler.jsonc` contains a placeholder D1 database ID.
 - Tag filtering uses simple SQL matching against JSON-encoded tags for the first version.
+- Firefox Android extension support may require later packaging/distribution work.

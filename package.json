@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "vite",
     "dev:worker": "wrangler dev",
-    "build": "vite build",
-    "typecheck": "tsc --noEmit",
+    "build": "npm run build:web && npm run build:extension",
+    "build:web": "vite build",
+    "build:extension": "tsc -p extension/tsconfig.json",
+    "typecheck": "tsc --noEmit && tsc -p extension/tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
     "deploy": "npm run build && wrangler deploy"

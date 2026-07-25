@@ -1,5 +1,6 @@
 node_modules/
 dist/
+extension/dist/
 .dev.vars
 .env
 .env.*
@@ -8,4 +9,3 @@ dist/
 coverage/
 *.zip
 .DS_Store
-
