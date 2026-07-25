@@ -1,5 +1,5 @@
-import { getBrowserApi, type TabInfo } from "./browser-api";
-import { loadSettings, normalizeApiUrl } from "./settings";
+import { getBrowserApi, type TabInfo } from "./browser-api.js";
+import { loadSettings, normalizeApiUrl } from "./settings.js";
 
 interface SaveResponse {
   bookmark?: {

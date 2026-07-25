@@ -1,4 +1,4 @@
-import { loadSettings, normalizeApiUrl, saveSettings } from "./settings";
+import { loadSettings, normalizeApiUrl, saveSettings } from "./settings.js";
 
 const form = getRequiredElement<HTMLFormElement>("#settings-form");
 const apiUrlInput = getRequiredElement<HTMLInputElement>("#api-url");
@@ -13,6 +13,7 @@ async function initialize(): Promise<void> {
     const settings = await loadSettings();
     apiUrlInput.value = settings.apiUrl;
     apiTokenInput.value = settings.apiToken;
+    showStatus("Settings loaded.", "neutral");
   } catch (error) {
     showStatus(getErrorMessage(error), "error");
   }

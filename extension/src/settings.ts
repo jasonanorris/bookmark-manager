@@ -1,4 +1,4 @@
-import { getBrowserApi, type ExtensionSettings } from "./browser-api";
+import { getBrowserApi, type ExtensionSettings } from "./browser-api.js";
 
 const DEFAULT_SETTINGS: ExtensionSettings = {
   apiUrl: "",
@@ -67,4 +67,3 @@ function isAllowedProtocol(url: URL): boolean {
 
   return url.hostname === "localhost" || url.hostname === "127.0.0.1";
 }
-
