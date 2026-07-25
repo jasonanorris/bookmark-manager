@@ -18,17 +18,21 @@ The first version is a personal app. It will use one shared API password/token s
 
 ## Current Status
 
-Phase 0 is the project foundation:
+Phase 1 includes the Worker API and D1 foundation:
 
 - npm project configuration
 - TypeScript configuration
 - Vite React entry point
 - Wrangler configuration with placeholder D1 values
 - Minimal Worker health route
-- Initial Vitest coverage
+- Bookmark D1 migration
+- Authenticated bookmark CRUD API
+- Search, tag filtering, limit, and offset support
+- Duplicate URL upsert behavior
+- Initial Vitest coverage for API behavior
 - Local secret example
 
-The bookmark CRUD API, D1 migration, web interface, and browser extension are planned next.
+The web bookmark management UI and browser extension are planned next.
 
 ## Local Setup
 
@@ -56,6 +60,12 @@ Run the Worker locally:
 
 ```bash
 npm run dev:worker
+```
+
+Apply the local D1 migration before using bookmark endpoints:
+
+```bash
+npx wrangler d1 migrations apply bookmark-manager --local
 ```
 
 ## Development Commands
@@ -129,9 +139,15 @@ The extension is planned for a later phase. It will include:
 
 The production token must be entered by the user in extension settings. It must not be committed in extension source code.
 
-## API Notes
+## API
 
-Planned bookmark endpoints:
+Health check:
+
+```text
+GET /api/health
+```
+
+Bookmark endpoints:
 
 ```text
 GET    /api/bookmarks
@@ -147,16 +163,108 @@ All bookmark API routes will require:
 Authorization: Bearer YOUR_TOKEN
 ```
 
-The current scaffold includes:
+List parameters:
 
 ```text
-GET /api/health
+GET /api/bookmarks?search=cloudflare
+GET /api/bookmarks?tag=development
+GET /api/bookmarks?limit=50
+GET /api/bookmarks?offset=0
+GET /api/bookmarks?search=worker&tag=development
+```
+
+Default `limit` is `50`. Maximum `limit` is `100`.
+
+Create or update a duplicate bookmark:
+
+```bash
+curl -X POST http://localhost:8787/api/bookmarks \
+  -H "Authorization: Bearer local-development-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://developers.cloudflare.com/workers/",
+    "title": "Cloudflare Workers",
+    "description": "Worker platform documentation",
+    "tags": ["cloudflare", "workers"]
+  }'
+```
+
+List bookmarks:
+
+```bash
+curl http://localhost:8787/api/bookmarks \
+  -H "Authorization: Bearer local-development-token"
+```
+
+Search bookmarks:
+
+```bash
+curl "http://localhost:8787/api/bookmarks?search=worker" \
+  -H "Authorization: Bearer local-development-token"
+```
+
+Update a bookmark:
+
+```bash
+curl -X PATCH http://localhost:8787/api/bookmarks/1 \
+  -H "Authorization: Bearer local-development-token" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Updated title",
+    "tags": ["reference"]
+  }'
+```
+
+Delete a bookmark:
+
+```bash
+curl -X DELETE http://localhost:8787/api/bookmarks/1 \
+  -H "Authorization: Bearer local-development-token"
+```
+
+Successful bookmark response:
+
+```json
+{
+  "bookmark": {
+    "id": 1,
+    "url": "https://example.com",
+    "title": "Example",
+    "description": "",
+    "tags": ["reference"],
+    "createdAt": "2026-07-25T15:00:00.000Z",
+    "updatedAt": "2026-07-25T15:00:00.000Z"
+  }
+}
+```
+
+Successful list response:
+
+```json
+{
+  "bookmarks": [],
+  "pagination": {
+    "limit": 50,
+    "offset": 0,
+    "count": 0
+  }
+}
+```
+
+Error response:
+
+```json
+{
+  "error": {
+    "code": "INVALID_URL",
+    "message": "A valid HTTP or HTTPS URL is required."
+  }
+}
 ```
 
 ## Known Limitations
 
-- Bookmark CRUD is not implemented yet.
-- D1 schema migration is planned for Phase 1.
 - Web bookmark management UI is not implemented yet.
 - Browser extension is not implemented yet.
 - `wrangler.jsonc` contains a placeholder D1 database ID.
+- Tag filtering uses simple SQL matching against JSON-encoded tags for the first version.
