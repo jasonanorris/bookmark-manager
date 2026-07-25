@@ -22,7 +22,7 @@ const emptyForm: BookmarkFormState = {
   description: "",
   tags: ""
 };
-const appVersion = "0.1.0";
+const appVersion = "0.1.1";
 
 export function App(): JSX.Element {
   const [token, setToken] = useState(() => loadStoredToken());

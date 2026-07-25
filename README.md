@@ -88,6 +88,7 @@ npm run typecheck
 npm run test
 npm run build
 npm run build:extension
+npm run package:extension
 ```
 
 ## Cloudflare Setup
@@ -189,12 +190,25 @@ Build the extension scripts:
 npm run build:extension
 ```
 
+Package the extension for local release:
+
+```bash
+npm run package:extension
+```
+
+The package command writes `extension/releases/bookmark-manager-0.1.1.zip`.
+Release zip files are local artifacts and are ignored by Git.
+
 Load it temporarily in Firefox on Linux Mint:
 
 1. Open `about:debugging`.
 2. Select `This Firefox`.
 3. Select `Load Temporary Add-on`.
 4. Choose `extension/manifest.json`.
+
+To update a temporary install, remove the old temporary add-on in `about:debugging`,
+run `npm run build:extension`, and load `extension/manifest.json` again. See
+`extension/README.md` for the extension-specific workflow.
 
 For local development, open the extension settings and use:
 
