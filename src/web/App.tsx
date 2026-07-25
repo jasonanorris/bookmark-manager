@@ -45,6 +45,7 @@ export function App(): JSX.Element {
   const [expandedBookmarkIds, setExpandedBookmarkIds] = useState<Set<number>>(
     () => new Set()
   );
+  const [copiedBookmarkId, setCopiedBookmarkId] = useState<number | null>(null);
   const [form, setForm] = useState<BookmarkFormState>(emptyForm);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editForm, setEditForm] = useState<BookmarkFormState>(emptyForm);
@@ -181,6 +182,19 @@ export function App(): JSX.Element {
 
       return nextIds;
     });
+  }
+
+  async function copyBookmarkUrl(bookmark: Bookmark): Promise<void> {
+    setError("");
+    setNotice("");
+
+    try {
+      await navigator.clipboard.writeText(bookmark.url);
+      setCopiedBookmarkId(bookmark.id);
+      window.setTimeout(() => setCopiedBookmarkId(null), 1600);
+    } catch {
+      setError("URL could not be copied.");
+    }
   }
 
   async function handleCreate(event: FormEvent<HTMLFormElement>): Promise<void> {
@@ -529,11 +543,19 @@ export function App(): JSX.Element {
                       </div>
                       <button
                         type="button"
+                        className="secondary-button copy-button"
+                        onClick={() => copyBookmarkUrl(bookmark)}
+                      >
+                        {copiedBookmarkId === bookmark.id ? "Copied" : "Copy"}
+                      </button>
+                      <button
+                        type="button"
                         className="secondary-button compact-toggle"
                         onClick={() => toggleBookmarkExpanded(bookmark.id)}
                         aria-expanded={isExpanded}
+                        aria-label={isExpanded ? "Minimize bookmark" : "Maximize bookmark"}
                       >
-                        {isExpanded ? "Minimize" : "Maximize"}
+                        {isExpanded ? "-" : "+"}
                       </button>
                     </div>
 

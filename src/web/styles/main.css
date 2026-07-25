@@ -356,17 +356,28 @@ h3 {
 
 .bookmark-compact {
   display: flex;
-  gap: 14px;
+  gap: 10px;
   align-items: center;
   justify-content: space-between;
 }
 
 .bookmark-summary {
+  display: grid;
+  grid-template-columns: minmax(120px, max-content) minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .bookmark-card h3 {
-  margin-bottom: 4px;
+  min-width: 0;
+  margin-bottom: 0;
+  overflow: hidden;
+  font-size: 1rem;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .bookmark-card h3 a {
@@ -396,8 +407,12 @@ h3 {
 
 .bookmark-url {
   display: block;
+  min-width: 0;
   overflow-wrap: anywhere;
+  overflow: hidden;
   font-size: 0.92rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .bookmark-details {
@@ -436,7 +451,16 @@ h3 {
 
 .compact-toggle {
   flex: 0 0 auto;
+  width: 38px;
+  min-width: 38px;
   min-height: 36px;
+  padding: 0;
+}
+
+.copy-button {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 12px;
 }
 
 .card-actions {
@@ -474,7 +498,8 @@ h3 {
   }
 
   .toolbar,
-  .bookmark-form {
+  .bookmark-form,
+  .bookmark-summary {
     grid-template-columns: 1fr;
   }
 
