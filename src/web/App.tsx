@@ -421,10 +421,13 @@ function BookmarkForm({
         <label htmlFor={onCancel ? "edit-url" : "new-url"}>URL</label>
         <input
           id={onCancel ? "edit-url" : "new-url"}
-          type="url"
+          type="text"
+          inputMode="url"
+          autoCapitalize="none"
+          autoCorrect="off"
           value={form.url}
           onChange={(event) => onChange({ ...form, url: event.target.value })}
-          placeholder="https://example.com"
+          placeholder="example.com"
           required
         />
       </div>

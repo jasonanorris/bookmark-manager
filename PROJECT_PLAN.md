@@ -10,7 +10,7 @@ The first version is for personal use. Keep the architecture simple, avoid multi
 
 - Host the API and built React frontend from the same Cloudflare Worker.
 - Store bookmarks in one D1 `bookmarks` table with JSON-encoded tags.
-- Use conservative URL normalization for duplicate detection.
+- Use conservative URL normalization for duplicate detection, including defaulting scheme-less bookmark URLs to HTTPS.
 - Protect bookmark API requests with one shared password/token stored as a Worker secret.
 - Let the browser extension and web app store the user-entered password/token locally per device so it does not need to be re-entered.
 - Keep public deployment on Cloudflare; keep admin/server infrastructure private unless explicitly needed.

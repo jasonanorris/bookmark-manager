@@ -293,13 +293,13 @@ describe("worker API", () => {
     expect(response.status).toBe(401);
   });
 
-  it("creates a valid bookmark", async () => {
+  it("creates a valid bookmark from a bare domain", async () => {
     const env = createTestEnv();
     const response = await worker.fetch(
       apiRequest("/api/bookmarks", {
         method: "POST",
         body: jsonBody({
-          url: "https://example.com/articles",
+          url: "example.com/articles",
           title: "Example Article",
           description: "A useful reference.",
           tags: ["Reference", "reference", "Cloudflare"]
@@ -364,7 +364,7 @@ describe("worker API", () => {
       apiRequest("/api/bookmarks", {
         method: "POST",
         body: jsonBody({
-          url: "https://example.com/",
+          url: "example.com",
           title: "Second",
           tags: ["updated"]
         })

@@ -159,6 +159,10 @@ Current web features:
 - Delete bookmarks with confirmation
 - Show loading, empty, success, and error states
 
+Bookmark URLs can be entered with or without a scheme. For example,
+`example.com` is accepted and saved as `https://example.com`. Explicit URLs
+must still use `http` or `https`; unsupported protocols are rejected.
+
 ## API
 
 Health check:
@@ -277,7 +281,7 @@ Error response:
 {
   "error": {
     "code": "INVALID_URL",
-    "message": "A valid HTTP or HTTPS URL is required."
+    "message": "A valid website URL is required."
   }
 }
 ```

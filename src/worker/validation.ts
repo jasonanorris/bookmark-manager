@@ -165,28 +165,36 @@ export function normalizeUrl(value: string): string {
 
 function validateUrl(value: unknown): string {
   if (typeof value !== "string") {
-    throw new ValidationError("INVALID_URL", "A valid HTTP or HTTPS URL is required.");
+    throw new ValidationError("INVALID_URL", "A valid website URL is required.");
   }
 
   const trimmedUrl = value.trim();
 
   if (trimmedUrl.length === 0 || trimmedUrl.length > MAX_URL_LENGTH) {
-    throw new ValidationError("INVALID_URL", "A valid HTTP or HTTPS URL is required.");
+    throw new ValidationError("INVALID_URL", "A valid website URL is required.");
   }
 
   let parsedUrl: URL;
 
   try {
-    parsedUrl = new URL(trimmedUrl);
+    parsedUrl = new URL(addDefaultScheme(trimmedUrl));
   } catch {
-    throw new ValidationError("INVALID_URL", "A valid HTTP or HTTPS URL is required.");
+    throw new ValidationError("INVALID_URL", "A valid website URL is required.");
   }
 
   if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
-    throw new ValidationError("INVALID_URL", "A valid HTTP or HTTPS URL is required.");
+    throw new ValidationError("INVALID_URL", "A valid website URL is required.");
   }
 
-  return trimmedUrl;
+  return parsedUrl.toString();
+}
+
+function addDefaultScheme(value: string): string {
+  if (/^[a-z][a-z\d+.-]*:/i.test(value)) {
+    return value;
+  }
+
+  return `https://${value}`;
 }
 
 function validateText(
@@ -322,4 +330,3 @@ function cleanOptionalQuery(
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
-
