@@ -10,6 +10,7 @@
   --page-bg: #101113;
   --panel-bg: #181a1d;
   --panel-muted: #202327;
+  --panel-hover: #24282d;
   --border: #30343a;
   --border-strong: #454b54;
   --text: #e8ecef;
@@ -38,6 +39,7 @@
   --page-bg: #f4f6f8;
   --panel-bg: #ffffff;
   --panel-muted: #eef2f7;
+  --panel-hover: #f8fafc;
   --border: #d9e2ec;
   --border-strong: #cbd5e1;
   --text: #18212f;
@@ -352,6 +354,18 @@ h3 {
   border-radius: 8px;
   background: var(--panel-bg);
   padding: 14px;
+}
+
+.bookmark-card {
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+.bookmark-card:hover,
+.bookmark-card:focus-within {
+  border-color: var(--accent);
+  background: var(--panel-hover);
 }
 
 .bookmark-compact {
