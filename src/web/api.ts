@@ -1,4 +1,6 @@
 import type {
+  BookmarkExportResponse,
+  BookmarkImportResponse,
   BookmarkListOptions,
   BookmarkListResponse,
   BookmarkMutationResponse,
@@ -80,6 +82,20 @@ export async function deleteBookmark(token: string, id: number): Promise<void> {
   });
 }
 
+export async function exportBookmarks(token: string): Promise<BookmarkExportResponse> {
+  return apiFetch<BookmarkExportResponse>("/api/bookmarks/export", token);
+}
+
+export async function importBookmarks(
+  token: string,
+  backup: unknown
+): Promise<BookmarkImportResponse> {
+  return apiFetch<BookmarkImportResponse>("/api/bookmarks/import", token, {
+    method: "POST",
+    body: JSON.stringify(backup)
+  });
+}
+
 async function apiFetch<T>(
   path: string,
   token: string,
@@ -149,4 +165,3 @@ function createApiError(response: Response, body: unknown): ApiError {
 
   return new ApiError(response.status, code, message);
 }
-

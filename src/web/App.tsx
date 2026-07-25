@@ -1,9 +1,11 @@
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import {
   ApiError,
   createBookmark,
   deleteBookmark,
+  exportBookmarks,
   getBookmarks,
+  importBookmarks,
   updateBookmark
 } from "./api";
 import { clearStoredToken, loadStoredToken, saveStoredToken } from "./storage";
@@ -22,7 +24,7 @@ const emptyForm: BookmarkFormState = {
   description: "",
   tags: ""
 };
-const appVersion = "0.1.1";
+const appVersion = "0.1.2";
 
 export function App(): JSX.Element {
   const [token, setToken] = useState(() => loadStoredToken());
@@ -36,8 +38,11 @@ export function App(): JSX.Element {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const importInputRef = useRef<HTMLInputElement | null>(null);
 
   const availableTags = useMemo(() => {
     const tags = new Map<string, string>();
@@ -221,6 +226,68 @@ export function App(): JSX.Element {
     }
   }
 
+  async function handleExport(): Promise<void> {
+    setIsExporting(true);
+    setError("");
+    setNotice("");
+
+    try {
+      const backup = await exportBookmarks(token);
+      const blob = new Blob([`${JSON.stringify(backup, null, 2)}\n`], {
+        type: "application/json"
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `bookmark-manager-backup-${backup.exportedAt.slice(0, 10)}.json`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      setNotice(`Exported ${backup.bookmarks.length} bookmarks.`);
+    } catch (caughtError) {
+      setError(getErrorMessage(caughtError));
+    } finally {
+      setIsExporting(false);
+    }
+  }
+
+  function openImportPicker(): void {
+    importInputRef.current?.click();
+  }
+
+  async function handleImport(event: ChangeEvent<HTMLInputElement>): Promise<void> {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) {
+      return;
+    }
+
+    setIsImporting(true);
+    setError("");
+    setNotice("");
+
+    try {
+      const backup = JSON.parse(await file.text()) as unknown;
+      const response = await importBookmarks(token, backup);
+      const summary = response.import;
+      setNotice(
+        `Imported ${summary.total} bookmarks: ${summary.created} created, ${summary.updated} updated.`
+      );
+      await loadBookmarks();
+    } catch (caughtError) {
+      if (caughtError instanceof SyntaxError) {
+        setError("Choose a valid JSON backup file.");
+        return;
+      }
+
+      setError(getErrorMessage(caughtError));
+    } finally {
+      setIsImporting(false);
+    }
+  }
+
   if (!token) {
     return (
       <main className="auth-shell">
@@ -262,6 +329,29 @@ export function App(): JSX.Element {
           <p className="app-version">v{appVersion}</p>
         </div>
         <div className="header-actions">
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={handleExport}
+            disabled={isExporting || isImporting}
+          >
+            {isExporting ? "Exporting..." : "Export"}
+          </button>
+          <button
+            type="button"
+            className="secondary-button"
+            onClick={openImportPicker}
+            disabled={isExporting || isImporting}
+          >
+            {isImporting ? "Importing..." : "Import"}
+          </button>
+          <input
+            ref={importInputRef}
+            className="visually-hidden"
+            type="file"
+            accept="application/json,.json"
+            onChange={handleImport}
+          />
           <button type="button" className="secondary-button" onClick={() => loadBookmarks()}>
             Refresh
           </button>

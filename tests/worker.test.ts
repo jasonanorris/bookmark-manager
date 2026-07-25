@@ -39,6 +39,21 @@ interface ApiBookmarkListResponse {
   };
 }
 
+interface ApiBookmarkExportResponse {
+  version: number;
+  exportedAt: string;
+  bookmarks: ApiBookmark[];
+}
+
+interface ApiBookmarkImportResponse {
+  import: {
+    created: number;
+    updated: number;
+    skipped: number;
+    total: number;
+  };
+}
+
 class TestD1Database {
   private bookmarks: StoredBookmark[] = [];
   private nextId = 1;
@@ -67,8 +82,9 @@ class TestD1Database {
   }
 
   all(sql: string, bindings: unknown[]): StoredBookmark[] {
-    const limit = Number(bindings.at(-2));
-    const offset = Number(bindings.at(-1));
+    const hasPagination = sql.includes(" LIMIT ? OFFSET ?");
+    const limit = hasPagination ? Number(bindings.at(-2)) : Number.MAX_SAFE_INTEGER;
+    const offset = hasPagination ? Number(bindings.at(-1)) : 0;
     let results = [...this.bookmarks];
     let bindingIndex = 0;
 
@@ -111,8 +127,8 @@ class TestD1Database {
         title: String(bindings[2]),
         description: String(bindings[3]),
         tags: String(bindings[4]),
-        created_at: timestamp,
-        updated_at: timestamp
+        created_at: bindings[5] ? String(bindings[5]) : timestamp,
+        updated_at: bindings[6] ? String(bindings[6]) : timestamp
       };
 
       this.bookmarks.push(bookmark);
@@ -585,6 +601,150 @@ describe("worker API", () => {
 
     expect(body.bookmarks.map((bookmark) => bookmark.title)).toEqual(["Second"]);
     expect(body.pagination).toEqual({ limit: 1, offset: 1, count: 1 });
+  });
+
+  it("exports all bookmarks as backup JSON", async () => {
+    const env = createTestEnv();
+
+    await worker.fetch(
+      apiRequest("/api/bookmarks", {
+        method: "POST",
+        body: jsonBody({
+          url: "https://example.com/export",
+          title: "Export Me",
+          tags: ["backup"]
+        })
+      }),
+      env
+    );
+
+    const response = await worker.fetch(apiRequest("/api/bookmarks/export"), env);
+    const body = await readJson<ApiBookmarkExportResponse>(response);
+
+    expect(response.status).toBe(200);
+    expect(body.version).toBe(1);
+    expect(new Date(body.exportedAt).toString()).not.toBe("Invalid Date");
+    expect(body.bookmarks).toHaveLength(1);
+    expect(body.bookmarks[0]).toMatchObject({
+      url: "https://example.com/export",
+      title: "Export Me",
+      tags: ["backup"]
+    });
+  });
+
+  it("imports backup bookmarks and cleans tags", async () => {
+    const env = createTestEnv();
+
+    const response = await worker.fetch(
+      apiRequest("/api/bookmarks/import", {
+        method: "POST",
+        body: jsonBody({
+          version: 1,
+          bookmarks: [
+            {
+              url: "import.example.com",
+              title: "Imported",
+              description: "From backup",
+              tags: ["Backup", "backup", " restored "],
+              createdAt: "2026-07-20T12:00:00.000Z",
+              updatedAt: "2026-07-21T12:00:00.000Z"
+            }
+          ]
+        })
+      }),
+      env
+    );
+    const body = await readJson<ApiBookmarkImportResponse>(response);
+    const listResponse = await worker.fetch(apiRequest("/api/bookmarks"), env);
+    const listBody = await readJson<ApiBookmarkListResponse>(listResponse);
+
+    expect(response.status).toBe(200);
+    expect(body.import).toEqual({
+      created: 1,
+      updated: 0,
+      skipped: 0,
+      total: 1
+    });
+    expect(listBody.bookmarks[0]).toMatchObject({
+      url: "https://import.example.com/",
+      title: "Imported",
+      description: "From backup",
+      tags: ["Backup", "restored"],
+      createdAt: "2026-07-20T12:00:00.000Z",
+      updatedAt: "2026-07-21T12:00:00.000Z"
+    });
+  });
+
+  it("updates duplicate URLs during import", async () => {
+    const env = createTestEnv();
+
+    await worker.fetch(
+      apiRequest("/api/bookmarks", {
+        method: "POST",
+        body: jsonBody({
+          url: "https://example.com/duplicate",
+          title: "Before Import"
+        })
+      }),
+      env
+    );
+
+    const response = await worker.fetch(
+      apiRequest("/api/bookmarks/import", {
+        method: "POST",
+        body: jsonBody({
+          bookmarks: [
+            {
+              url: "https://EXAMPLE.com/duplicate#section",
+              title: "After Import",
+              tags: ["merged"]
+            }
+          ]
+        })
+      }),
+      env
+    );
+    const body = await readJson<ApiBookmarkImportResponse>(response);
+    const listResponse = await worker.fetch(apiRequest("/api/bookmarks"), env);
+    const listBody = await readJson<ApiBookmarkListResponse>(listResponse);
+
+    expect(body.import).toEqual({
+      created: 0,
+      updated: 1,
+      skipped: 0,
+      total: 1
+    });
+    expect(listBody.bookmarks).toHaveLength(1);
+    expect(listBody.bookmarks[0]).toMatchObject({
+      title: "After Import",
+      tags: ["merged"]
+    });
+    expect(response.status).toBe(200);
+  });
+
+  it("rejects malformed import payloads", async () => {
+    const response = await worker.fetch(
+      apiRequest("/api/bookmarks/import", {
+        method: "POST",
+        body: jsonBody({
+          bookmarks: [
+            {
+              url: "ftp://example.com/file",
+              title: "Bad"
+            }
+          ]
+        })
+      }),
+      createTestEnv()
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        code: "INVALID_IMPORT",
+        message: "Bookmark 1: A valid website URL is required."
+      }
+    });
+    expect(response.status).toBe(400);
   });
 
   it("rejects out-of-range pagination parameters", async () => {

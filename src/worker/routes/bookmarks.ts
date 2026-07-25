@@ -1,6 +1,7 @@
 import { jsonError, jsonResponse, emptyResponse } from "../responses";
 import type {
   Bookmark,
+  BookmarkImportInput,
   BookmarkInput,
   BookmarkPatch,
   BookmarkRow,
@@ -10,7 +11,9 @@ import type {
 import {
   parseBookmarkId,
   parseListOptions,
+  readImportJsonBody,
   readJsonBody,
+  validateBookmarkImport,
   validateBookmarkInput,
   validateBookmarkPatch,
   ValidationError
@@ -35,6 +38,22 @@ export async function handleBookmarksRequest(
     }
 
     if (pathParts.length === 1) {
+      if (pathParts[0] === "export") {
+        if (request.method === "GET") {
+          return await exportBookmarks(request, env);
+        }
+
+        return methodNotAllowed(request, env);
+      }
+
+      if (pathParts[0] === "import") {
+        if (request.method === "POST") {
+          return await importBookmarks(request, env);
+        }
+
+        return methodNotAllowed(request, env);
+      }
+
       const id = parseBookmarkId(pathParts[0]);
 
       if (request.method === "GET") {
@@ -203,6 +222,51 @@ async function deleteBookmark(
   return emptyResponse(request, env, { status: 204 });
 }
 
+async function exportBookmarks(request: Request, env: Env): Promise<Response> {
+  const result = await env.DB.prepare(
+    "SELECT * FROM bookmarks ORDER BY created_at DESC, id DESC"
+  ).all<BookmarkRow>();
+
+  return jsonResponse(
+    {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      bookmarks: result.results.map(mapBookmark)
+    },
+    request,
+    env
+  );
+}
+
+async function importBookmarks(request: Request, env: Env): Promise<Response> {
+  const body = await readImportJsonBody(request);
+  const bookmarks = validateBookmarkImport(body);
+  const summary = {
+    created: 0,
+    updated: 0,
+    skipped: 0,
+    total: bookmarks.length
+  };
+
+  for (const bookmark of bookmarks) {
+    const existingBookmark = await findBookmarkByNormalizedUrl(
+      env,
+      bookmark.normalizedUrl
+    );
+
+    if (existingBookmark) {
+      await updateBookmarkRow(env, existingBookmark.id, bookmark);
+      summary.updated += 1;
+      continue;
+    }
+
+    await insertBookmarkRow(env, bookmark);
+    summary.created += 1;
+  }
+
+  return jsonResponse({ import: summary }, request, env);
+}
+
 async function findBookmarkById(env: Env, id: number): Promise<BookmarkRow | null> {
   return env.DB.prepare("SELECT * FROM bookmarks WHERE id = ?")
     .bind(id)
@@ -246,6 +310,27 @@ async function updateBookmarkRow(
       patch.description ?? existingBookmark.description,
       stringifyTags(patch.tags ?? parseTags(existingBookmark.tags)),
       id
+    )
+    .run();
+}
+
+async function insertBookmarkRow(
+  env: Env,
+  input: BookmarkInput | BookmarkImportInput
+): Promise<void> {
+  await env.DB.prepare(
+    `INSERT INTO bookmarks
+      (url, normalized_url, title, description, tags, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, COALESCE(?, CURRENT_TIMESTAMP), COALESCE(?, CURRENT_TIMESTAMP))`
+  )
+    .bind(
+      input.url,
+      input.normalizedUrl,
+      input.title,
+      input.description,
+      stringifyTags(input.tags),
+      "createdAt" in input ? input.createdAt ?? null : null,
+      "updatedAt" in input ? input.updatedAt ?? null : null
     )
     .run();
 }

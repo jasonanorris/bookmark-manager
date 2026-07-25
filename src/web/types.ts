@@ -36,6 +36,21 @@ export interface BookmarkMutationResponse {
   created?: boolean;
 }
 
+export interface BookmarkExportResponse {
+  version: number;
+  exportedAt: string;
+  bookmarks: Bookmark[];
+}
+
+export interface BookmarkImportResponse {
+  import: {
+    created: number;
+    updated: number;
+    skipped: number;
+    total: number;
+  };
+}
+
 export interface BookmarkListOptions {
   search?: string;
   tag?: string;
@@ -43,4 +58,3 @@ export interface BookmarkListOptions {
   offset?: number;
   signal?: AbortSignal;
 }
-

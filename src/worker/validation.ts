@@ -1,11 +1,18 @@
-import type { BookmarkInput, BookmarkPatch, ListOptions } from "./types";
+import type {
+  BookmarkImportInput,
+  BookmarkInput,
+  BookmarkPatch,
+  ListOptions
+} from "./types";
 
 const MAX_BODY_BYTES = 64 * 1024;
+const MAX_IMPORT_BODY_BYTES = 1024 * 1024;
 const MAX_URL_LENGTH = 2048;
 const MAX_TITLE_LENGTH = 500;
 const MAX_DESCRIPTION_LENGTH = 5000;
 const MAX_TAG_COUNT = 20;
 const MAX_TAG_LENGTH = 50;
+const MAX_IMPORT_BOOKMARKS = 1000;
 const DEFAULT_LIMIT = 50;
 const MAX_LIMIT = 100;
 
@@ -19,9 +26,20 @@ export class ValidationError extends Error {
 }
 
 export async function readJsonBody(request: Request): Promise<unknown> {
+  return readJsonBodyWithLimit(request, MAX_BODY_BYTES);
+}
+
+export async function readImportJsonBody(request: Request): Promise<unknown> {
+  return readJsonBodyWithLimit(request, MAX_IMPORT_BODY_BYTES);
+}
+
+async function readJsonBodyWithLimit(
+  request: Request,
+  maxBodyBytes: number
+): Promise<unknown> {
   const contentLength = request.headers.get("content-length");
 
-  if (contentLength && Number(contentLength) > MAX_BODY_BYTES) {
+  if (contentLength && Number(contentLength) > maxBodyBytes) {
     throw new ValidationError(
       "REQUEST_TOO_LARGE",
       "The request body is too large."
@@ -30,7 +48,7 @@ export async function readJsonBody(request: Request): Promise<unknown> {
 
   const body = await request.text();
 
-  if (new TextEncoder().encode(body).length > MAX_BODY_BYTES) {
+  if (new TextEncoder().encode(body).length > maxBodyBytes) {
     throw new ValidationError(
       "REQUEST_TOO_LARGE",
       "The request body is too large."
@@ -102,6 +120,46 @@ export function validateBookmarkPatch(value: unknown): BookmarkPatch {
   }
 
   return patch;
+}
+
+export function validateBookmarkImport(value: unknown): BookmarkImportInput[] {
+  if (!isRecord(value) || !Array.isArray(value.bookmarks)) {
+    throw new ValidationError(
+      "INVALID_IMPORT",
+      "The import body must include a bookmarks array."
+    );
+  }
+
+  if (value.bookmarks.length > MAX_IMPORT_BOOKMARKS) {
+    throw new ValidationError(
+      "INVALID_IMPORT",
+      "An import can include up to 1000 bookmarks."
+    );
+  }
+
+  return value.bookmarks.map((bookmark, index) => {
+    try {
+      const input = validateBookmarkInput(bookmark);
+
+      if (!isRecord(bookmark)) {
+        return input;
+      }
+
+      return {
+        ...input,
+        ...validateOptionalImportDates(bookmark)
+      };
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        throw new ValidationError(
+          "INVALID_IMPORT",
+          `Bookmark ${index + 1}: ${error.message}`
+        );
+      }
+
+      throw error;
+    }
+  });
 }
 
 export function parseBookmarkId(value: string): number {
@@ -325,6 +383,44 @@ function cleanOptionalQuery(
   }
 
   return trimmedValue;
+}
+
+function validateOptionalImportDates(
+  value: Record<string, unknown>
+): Pick<BookmarkImportInput, "createdAt" | "updatedAt"> {
+  return {
+    ...validateOptionalImportDate(value.createdAt, "createdAt"),
+    ...validateOptionalImportDate(value.updatedAt, "updatedAt")
+  };
+}
+
+function validateOptionalImportDate(
+  value: unknown,
+  fieldName: "createdAt" | "updatedAt"
+): Pick<BookmarkImportInput, "createdAt" | "updatedAt"> {
+  if (value === undefined) {
+    return {};
+  }
+
+  if (typeof value !== "string") {
+    throw new ValidationError(
+      "INVALID_FIELD",
+      `The ${fieldName} field must be a valid timestamp.`
+    );
+  }
+
+  const timestamp = new Date(value);
+
+  if (Number.isNaN(timestamp.getTime())) {
+    throw new ValidationError(
+      "INVALID_FIELD",
+      `The ${fieldName} field must be a valid timestamp.`
+    );
+  }
+
+  return {
+    [fieldName]: timestamp.toISOString()
+  };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

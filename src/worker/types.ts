@@ -34,6 +34,11 @@ export interface BookmarkInput {
   normalizedUrl: string;
 }
 
+export interface BookmarkImportInput extends BookmarkInput {
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface BookmarkPatch {
   url?: string;
   title?: string;
@@ -48,4 +53,3 @@ export interface ListOptions {
   limit: number;
   offset: number;
 }
-

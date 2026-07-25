@@ -41,6 +41,15 @@ a:focus-visible {
   outline: 3px solid #f59e0b;
 }
 
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
 button {
   min-height: 42px;
   border: 0;

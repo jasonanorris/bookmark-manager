@@ -35,10 +35,11 @@ Current implementation includes:
 - Authenticated bookmark CRUD API
 - Search, tag filtering, limit, and offset support
 - Duplicate URL upsert behavior
+- JSON bookmark export and duplicate-safe import
 - Web app password setup stored locally in the browser
 - Web app bookmark create, list, search, filter, edit, and delete flows
 - Firefox-friendly browser extension for saving the current tab
-- Vitest coverage for API behavior, auth, CORS, validation, pagination, and tag filtering
+- Vitest coverage for API behavior, auth, CORS, validation, pagination, tag filtering, export, and import
 - Accessibility polish for web and extension status messages
 - Production deployment on Cloudflare Workers
 - Local secret example
@@ -196,7 +197,7 @@ Package the extension for local release:
 npm run package:extension
 ```
 
-The package command writes `extension/releases/bookmark-manager-0.1.1.zip`.
+The package command writes `extension/releases/bookmark-manager-0.1.2.zip`.
 Release zip files are local artifacts and are ignored by Git.
 
 Load it temporarily in Firefox on Linux Mint:
@@ -244,6 +245,7 @@ Current web features:
 - Filter by exact tag
 - Edit bookmark URL, title, description, and tags
 - Delete bookmarks with confirmation
+- Export and import bookmark backups as JSON
 - Show loading, empty, success, and error states
 
 Bookmark URLs can be entered with or without a scheme. For example,
@@ -263,7 +265,9 @@ Bookmark endpoints:
 ```text
 GET    /api/bookmarks
 GET    /api/bookmarks/:id
+GET    /api/bookmarks/export
 POST   /api/bookmarks
+POST   /api/bookmarks/import
 PATCH  /api/bookmarks/:id
 DELETE /api/bookmarks/:id
 ```
@@ -285,6 +289,44 @@ GET /api/bookmarks?search=worker&tag=development
 ```
 
 Default `limit` is `50`. Maximum `limit` is `100`.
+
+Export response:
+
+```json
+{
+  "version": 1,
+  "exportedAt": "2026-07-25T21:00:00.000Z",
+  "bookmarks": [
+    {
+      "id": 1,
+      "url": "https://example.com",
+      "title": "Example",
+      "description": "",
+      "tags": ["reference"],
+      "createdAt": "2026-07-25T21:00:00.000Z",
+      "updatedAt": "2026-07-25T21:00:00.000Z"
+    }
+  ]
+}
+```
+
+Import accepts the same top-level shape and uses the `bookmarks` array. It
+validates each bookmark with the normal server rules, trims and deduplicates
+tags, and upserts by normalized URL. Existing bookmarks are updated instead of
+duplicated.
+
+Import summary:
+
+```json
+{
+  "import": {
+    "created": 1,
+    "updated": 0,
+    "skipped": 0,
+    "total": 1
+  }
+}
+```
 
 Create or update a duplicate bookmark:
 
