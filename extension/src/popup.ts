@@ -15,6 +15,7 @@ const setupPanel = getRequiredElement<HTMLElement>("#setup-panel");
 const openOptionsButton = getRequiredElement<HTMLButtonElement>("#open-options");
 const settingsButton = getRequiredElement<HTMLButtonElement>("#settings-button");
 const form = getRequiredElement<HTMLFormElement>("#bookmark-form");
+const apiTarget = getRequiredElement<HTMLParagraphElement>("#api-target");
 const titleInput = getRequiredElement<HTMLInputElement>("#title");
 const urlInput = getRequiredElement<HTMLInputElement>("#url");
 const descriptionInput = getRequiredElement<HTMLTextAreaElement>("#description");
@@ -37,6 +38,8 @@ async function initialize(): Promise<void> {
     const hasSettings = Boolean(settings.apiUrl && settings.apiToken);
     setupPanel.classList.toggle("hidden", hasSettings);
     form.classList.toggle("hidden", !hasSettings);
+    apiTarget.textContent = settings.apiUrl ? `Saving to ${settings.apiUrl}` : "";
+    showStatus(hasSettings ? "Ready." : "", "neutral");
 
     const tab = await getCurrentTab();
 

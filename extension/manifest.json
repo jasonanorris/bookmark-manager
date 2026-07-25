@@ -4,6 +4,11 @@
   "version": "0.1.0",
   "description": "Save the current tab to your self-hosted bookmark manager.",
   "permissions": ["activeTab", "storage", "tabs"],
+  "host_permissions": [
+    "http://localhost:8787/*",
+    "http://127.0.0.1:8787/*",
+    "https://bookmarks.radarapp.us/*"
+  ],
   "action": {
     "default_title": "Save Bookmark",
     "default_popup": "popup.html"
@@ -19,4 +24,3 @@
     }
   }
 }
-

@@ -167,6 +167,8 @@ API URL: http://localhost:8787
 API Password: the value from .dev.vars
 ```
 
+Use `Test Connection` on the settings page before trying the popup. A good local setup should show `Connection works.`. If it says `Bad password.`, update the API password. If it shows an HTTP or network error, confirm `npm run dev:worker` is running and the API URL matches the Worker URL.
+
 For production, use:
 
 ```text

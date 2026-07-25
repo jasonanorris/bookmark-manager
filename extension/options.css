@@ -92,9 +92,25 @@ button:hover {
   background: #0f4f63;
 }
 
+.secondary-button {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #1f2937;
+}
+
+.secondary-button:hover {
+  background: #eef2f7;
+}
+
 .actions {
   display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
   justify-content: flex-start;
+}
+
+.actions button {
+  flex: 1 1 180px;
 }
 
 .status {
@@ -121,4 +137,3 @@ button:hover {
     width: 100%;
   }
 }
-

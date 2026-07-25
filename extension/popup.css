@@ -60,6 +60,14 @@ h1 {
   gap: 10px;
 }
 
+.api-target {
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
 label {
   color: #334155;
   font-size: 0.82rem;
@@ -153,4 +161,3 @@ button:disabled {
 .hidden {
   display: none;
 }
-
