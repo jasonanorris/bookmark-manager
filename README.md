@@ -18,12 +18,18 @@ The first version is a personal app. It will use one shared API password/token s
 
 ## Current Status
 
-Phase 3 includes the Worker API, D1 foundation, usable web interface, and Firefox-first browser extension:
+The app is deployed at:
+
+```text
+https://bookmarks.radarapp.us
+```
+
+Current implementation includes:
 
 - npm project configuration
 - TypeScript configuration
 - Vite React entry point
-- Wrangler configuration with placeholder D1 values
+- Wrangler configuration for `bookmarks.radarapp.us`
 - Minimal Worker health route
 - Bookmark D1 migration
 - Authenticated bookmark CRUD API
@@ -33,9 +39,10 @@ Phase 3 includes the Worker API, D1 foundation, usable web interface, and Firefo
 - Web app bookmark create, list, search, filter, edit, and delete flows
 - Firefox-friendly browser extension for saving the current tab
 - Initial Vitest coverage for API behavior
+- Production deployment on Cloudflare Workers
 - Local secret example
 
-Production deployment is planned next.
+Cloudflare DNS may take a short time to resolve from every local resolver after deployment. Cloudflare's public resolver already returns records for `bookmarks.radarapp.us`.
 
 ## Local Setup
 
@@ -90,16 +97,22 @@ Log in to Cloudflare:
 npx wrangler login
 ```
 
-Create the D1 database:
+This deployment uses:
+
+```text
+https://bookmarks.radarapp.us
+```
+
+Create or confirm the D1 database:
 
 ```bash
 npx wrangler d1 create bookmark-manager
 ```
 
-Copy the returned database ID into `wrangler.jsonc`:
+Confirm the database ID in `wrangler.jsonc`:
 
 ```jsonc
-"database_id": "REPLACE_WITH_DATABASE_ID"
+"database_id": "53c75941-1cc5-4492-bed8-b6e73c60d4c1"
 ```
 
 Set the production API password/token as a Worker secret:
@@ -109,6 +122,16 @@ npx wrangler secret put EXTENSION_API_TOKEN
 ```
 
 Do not commit production secrets.
+
+Production CORS is configured with:
+
+```jsonc
+"vars": {
+  "ALLOWED_ORIGINS": "https://bookmarks.radarapp.us"
+}
+```
+
+Firefox and Chromium extension origins are allowed separately by the Worker.
 
 ## D1 Migrations
 
@@ -128,11 +151,23 @@ Only run remote migrations after confirming the target Cloudflare account and da
 
 ## Deployment
 
-After the D1 database ID and Worker secret are configured:
+Deploy after changes:
 
 ```bash
 npm run deploy
 ```
+
+Deployment checklist:
+
+1. Authenticate Wrangler with the intended Cloudflare account.
+2. Create or confirm the `bookmark-manager` D1 database.
+3. Confirm the D1 database ID in `wrangler.jsonc`.
+4. Set the production `EXTENSION_API_TOKEN` secret.
+5. Apply remote D1 migrations.
+6. Deploy the Worker.
+7. Open `https://bookmarks.radarapp.us`.
+8. Enter the production API password.
+9. Update extension settings to use `https://bookmarks.radarapp.us`.
 
 ## Browser Extension
 
@@ -325,6 +360,5 @@ Error response:
 
 ## Known Limitations
 
-- `wrangler.jsonc` contains a placeholder D1 database ID.
 - Tag filtering uses simple SQL matching against JSON-encoded tags for the first version.
 - Firefox Android extension support may require later packaging/distribution work.

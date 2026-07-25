@@ -8,12 +8,20 @@
     "binding": "ASSETS",
     "not_found_handling": "single-page-application"
   },
+  "routes": [
+    {
+      "pattern": "bookmarks.radarapp.us",
+      "custom_domain": true
+    }
+  ],
+  "vars": {
+    "ALLOWED_ORIGINS": "https://bookmarks.radarapp.us"
+  },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "bookmark-manager",
-      "database_id": "REPLACE_WITH_DATABASE_ID"
+      "database_id": "53c75941-1cc5-4492-bed8-b6e73c60d4c1"
     }
   ]
 }
-
