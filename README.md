@@ -18,7 +18,7 @@ The first version is a personal app. It will use one shared API password/token s
 
 ## Current Status
 
-Phase 1 includes the Worker API and D1 foundation:
+Phase 2 includes the Worker API, D1 foundation, and usable web interface:
 
 - npm project configuration
 - TypeScript configuration
@@ -29,10 +29,12 @@ Phase 1 includes the Worker API and D1 foundation:
 - Authenticated bookmark CRUD API
 - Search, tag filtering, limit, and offset support
 - Duplicate URL upsert behavior
+- Web app password setup stored locally in the browser
+- Web app bookmark create, list, search, filter, edit, and delete flows
 - Initial Vitest coverage for API behavior
 - Local secret example
 
-The web bookmark management UI and browser extension are planned next.
+The browser extension is planned next.
 
 ## Local Setup
 
@@ -67,6 +69,8 @@ Apply the local D1 migration before using bookmark endpoints:
 ```bash
 npx wrangler d1 migrations apply bookmark-manager --local
 ```
+
+For the web app to talk to the Worker API locally, open the Worker dev URL from `npm run dev:worker`. The Vite dev server is useful for frontend-only work, but the Worker serves the built app and API together in the deployed shape.
 
 ## Development Commands
 
@@ -138,6 +142,22 @@ The extension is planned for a later phase. It will include:
 - Current tab URL and title detection
 
 The production token must be entered by the user in extension settings. It must not be committed in extension source code.
+
+## Web App
+
+The web app can be used from a browser without the extension.
+
+On first use in a browser, it asks for the shared API password/token and stores it in `localStorage`. Future visits on that browser use the saved token automatically until you sign out or clear browser data.
+
+Current web features:
+
+- Add bookmarks
+- List recent bookmarks
+- Search bookmarks
+- Filter by tag
+- Edit bookmark URL, title, description, and tags
+- Delete bookmarks with confirmation
+- Show loading, empty, success, and error states
 
 ## API
 
@@ -264,7 +284,6 @@ Error response:
 
 ## Known Limitations
 
-- Web bookmark management UI is not implemented yet.
 - Browser extension is not implemented yet.
 - `wrangler.jsonc` contains a placeholder D1 database ID.
 - Tag filtering uses simple SQL matching against JSON-encoded tags for the first version.
