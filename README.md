@@ -2,7 +2,7 @@
 
 A small, self-hosted bookmark manager built with Cloudflare Workers, Cloudflare D1, React, Vite, TypeScript, and a Manifest V3 browser extension.
 
-The first version is a personal app. It will use one shared API password/token stored as a Cloudflare Worker secret and saved locally in each browser or extension install so it does not need to be re-entered on every use.
+Version 1.0 is a personal app. It uses one shared API password/token stored as a Cloudflare Worker secret and saved locally in each browser or extension install so it does not need to be re-entered on every use.
 
 ## Stack
 
@@ -16,7 +16,7 @@ The first version is a personal app. It will use one shared API password/token s
 - Browser Extension Manifest V3
 - Plain CSS
 
-## Current Status
+## Version 1.0
 
 The app is deployed at:
 
@@ -24,7 +24,7 @@ The app is deployed at:
 https://bookmarks.radarapp.us
 ```
 
-Current implementation includes:
+Version 1.0 includes:
 
 - npm project configuration
 - TypeScript configuration
@@ -46,9 +46,9 @@ Current implementation includes:
 - Vitest coverage for API behavior, auth, CORS, validation, pagination, tag filtering, export, and import
 - Accessibility polish for web and extension status messages
 - Production deployment on Cloudflare Workers
-- Local secret example
+- Local secret example and documentation
 
-Cloudflare DNS may take a short time to resolve from every local resolver after deployment. Cloudflare's public resolver already returns records for `bookmarks.radarapp.us`.
+The daily workflow is to use the web app directly on desktop or phone, and optionally use the Firefox desktop extension to save the current tab faster.
 
 ## Local Setup
 
@@ -164,6 +164,8 @@ Deploy after changes:
 npm run deploy
 ```
 
+Version 1.0 is tagged in Git as `v1.0.0`.
+
 Deployment checklist:
 
 1. Authenticate Wrangler with the intended Cloudflare account.
@@ -201,7 +203,7 @@ Package the extension for local release:
 npm run package:extension
 ```
 
-The package command writes `extension/releases/bookmark-manager-0.1.4.zip`.
+The package command writes `extension/releases/bookmark-manager-1.0.0.zip`.
 Release zip files are local artifacts and are ignored by Git.
 
 Load it temporarily in Firefox on Linux Mint:

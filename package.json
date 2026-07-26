@@ -1,6 +1,6 @@
 {
   "name": "bookmark-manager",
-  "version": "0.1.4",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
     "build": "npm run build:web && npm run build:extension",
     "build:web": "vite build",
     "build:extension": "tsc -p extension/tsconfig.json",
-    "package:extension": "npm run build:extension && mkdir -p extension/releases && cd extension && zip -r releases/bookmark-manager-0.1.4.zip manifest.json popup.html popup.css options.html options.css dist",
+    "package:extension": "npm run build:extension && mkdir -p extension/releases && cd extension && zip -r releases/bookmark-manager-1.0.0.zip manifest.json popup.html popup.css options.html options.css dist",
     "typecheck": "tsc --noEmit && tsc -p extension/tsconfig.json --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",

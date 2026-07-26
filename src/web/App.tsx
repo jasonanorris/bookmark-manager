@@ -24,7 +24,7 @@ const emptyForm: BookmarkFormState = {
   description: "",
   tags: ""
 };
-const appVersion = "0.1.4";
+const appVersion = "1.0.0";
 const themeStorageKey = "bookmark-manager-theme";
 
 type Theme = "dark" | "light";

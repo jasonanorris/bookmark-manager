@@ -13,7 +13,7 @@ npm run package:extension
 This builds the extension scripts and writes:
 
 ```text
-extension/releases/bookmark-manager-0.1.4.zip
+extension/releases/bookmark-manager-1.0.0.zip
 ```
 
 The zip is a local release artifact and is intentionally ignored by Git.
