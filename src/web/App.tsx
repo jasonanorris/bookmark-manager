@@ -344,9 +344,10 @@ export function App(): JSX.Element {
     return (
       <main className="auth-shell">
         <section className="auth-panel" aria-labelledby="auth-title">
-          <p className="eyebrow">Bookmark Manager</p>
+          <p className="eyebrow">
+            Bookmark Manager <span className="app-version-inline">v{appVersion}</span>
+          </p>
           <h1 id="auth-title">Enter API Password</h1>
-          <p className="app-version">v{appVersion}</p>
           <form className="auth-form" onSubmit={handleTokenSubmit}>
             <label htmlFor="api-token">Password</label>
             <input
@@ -376,9 +377,10 @@ export function App(): JSX.Element {
     <main className="app-shell">
       <header className="app-header">
         <div>
-          <p className="eyebrow">Bookmark Manager</p>
+          <p className="eyebrow">
+            Bookmark Manager <span className="app-version-inline">v{appVersion}</span>
+          </p>
           <h1>Bookmarks</h1>
-          <p className="app-version">v{appVersion}</p>
         </div>
         <button
           type="button"
