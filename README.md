@@ -41,6 +41,7 @@ Current implementation includes:
 - Default-dark web UI with a saved light/dark mode toggle
 - Collapsed search and add panels for a quieter main view
 - Compact bookmark list with expandable details
+- Mobile header actions collapsed behind a settings menu
 - Firefox-friendly browser extension for saving the current tab
 - Vitest coverage for API behavior, auth, CORS, validation, pagination, tag filtering, export, and import
 - Accessibility polish for web and extension status messages
@@ -200,7 +201,7 @@ Package the extension for local release:
 npm run package:extension
 ```
 
-The package command writes `extension/releases/bookmark-manager-0.1.3.zip`.
+The package command writes `extension/releases/bookmark-manager-0.1.4.zip`.
 Release zip files are local artifacts and are ignored by Git.
 
 Load it temporarily in Firefox on Linux Mint:
@@ -248,6 +249,7 @@ Current web features:
 - Filter by exact tag
 - Toggle dark and light mode
 - Expand bookmark details from a compact title and URL row
+- Use a mobile settings menu for page actions on small screens
 - Edit bookmark URL, title, description, and tags
 - Delete bookmarks with confirmation
 - Export and import bookmark backups as JSON

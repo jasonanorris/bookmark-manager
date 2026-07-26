@@ -195,6 +195,7 @@ textarea {
 }
 
 .app-header {
+  position: relative;
   display: flex;
   gap: 16px;
   align-items: flex-start;
@@ -208,6 +209,20 @@ textarea {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.menu-toggle {
+  display: none;
+}
+
+.menu-toggle svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
 }
 
 .toolbar {
@@ -494,21 +509,53 @@ h3 {
 @media (max-width: 760px) {
   .auth-shell,
   .app-shell {
-    padding: 18px;
+    padding: 14px;
   }
 
   .app-header,
   .section-heading,
-  .bookmark-compact,
   .bookmark-meta {
     align-items: stretch;
     flex-direction: column;
   }
 
+  .app-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 12px;
+  }
+
+  .menu-toggle {
+    display: inline-grid;
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+    place-items: center;
+  }
+
+  .header-actions {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 10;
+    display: none;
+    width: min(100%, 280px);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--panel-bg);
+    box-shadow: var(--shadow);
+    padding: 10px;
+  }
+
+  .header-actions.is-open {
+    display: grid;
+  }
+
   .header-actions button,
   .form-actions button,
   .card-actions button {
-    flex: 1 1 140px;
+    flex: 1 1 auto;
+    width: 100%;
   }
 
   .toolbar,
@@ -517,7 +564,53 @@ h3 {
     grid-template-columns: 1fr;
   }
 
+  .bookmark-card {
+    padding: 12px;
+  }
+
+  .bookmark-compact {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 8px;
+    align-items: start;
+  }
+
+  .bookmark-summary {
+    gap: 3px;
+  }
+
+  .bookmark-card h3 {
+    white-space: normal;
+  }
+
+  .bookmark-url {
+    font-size: 0.86rem;
+    white-space: normal;
+  }
+
+  .copy-button {
+    min-width: 60px;
+    padding: 0 10px;
+  }
+
   .bookmark-date {
     text-align: left;
+  }
+}
+
+@media (max-width: 440px) {
+  .bookmark-compact {
+    grid-template-columns: minmax(0, 1fr) 38px;
+  }
+
+  .copy-button {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    order: 2;
+  }
+
+  .compact-toggle {
+    grid-column: 2;
+    grid-row: 1;
   }
 }

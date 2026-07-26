@@ -24,7 +24,7 @@ const emptyForm: BookmarkFormState = {
   description: "",
   tags: ""
 };
-const appVersion = "0.1.3";
+const appVersion = "0.1.4";
 const themeStorageKey = "bookmark-manager-theme";
 
 type Theme = "dark" | "light";
@@ -42,6 +42,7 @@ export function App(): JSX.Element {
   const [selectedTag, setSelectedTag] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
   const [expandedBookmarkIds, setExpandedBookmarkIds] = useState<Set<number>>(
     () => new Set()
   );
@@ -379,7 +380,23 @@ export function App(): JSX.Element {
           <h1>Bookmarks</h1>
           <p className="app-version">v{appVersion}</p>
         </div>
-        <div className="header-actions">
+        <button
+          type="button"
+          className="secondary-button menu-toggle"
+          onClick={() => setIsActionMenuOpen((isOpen) => !isOpen)}
+          aria-expanded={isActionMenuOpen}
+          aria-controls="header-actions-menu"
+          aria-label="Open settings menu"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5Z" />
+            <path d="M19.4 15a8 8 0 0 0 .1-1.3l2-1.5-2-3.5-2.4 1a7.9 7.9 0 0 0-2.2-1.3L14.6 6h-4l-.4 2.4A7.9 7.9 0 0 0 8 9.7l-2.3-1-2 3.5 2 1.5A8 8 0 0 0 5.8 15l-2 1.5 2 3.5 2.3-1a7.9 7.9 0 0 0 2.2 1.3l.4 2.4h4l.4-2.4a7.9 7.9 0 0 0 2.2-1.3l2.4 1 2-3.5-2.1-1.5Z" />
+          </svg>
+        </button>
+        <div
+          id="header-actions-menu"
+          className={`header-actions${isActionMenuOpen ? " is-open" : ""}`}
+        >
           <button
             type="button"
             className="secondary-button"
