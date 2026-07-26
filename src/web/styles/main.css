@@ -612,19 +612,18 @@ h3 {
   }
 
   .bookmark-card {
+    position: relative;
     padding: 12px 14px;
   }
 
   .bookmark-compact {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 8px;
-    align-items: start;
+    display: block;
+    min-height: 74px;
   }
 
   .bookmark-summary {
-    grid-column: 1 / -1;
     gap: 2px;
+    padding-right: 88px;
   }
 
   .bookmark-card h3 {
@@ -648,14 +647,15 @@ h3 {
   }
 
   .copy-button {
-    grid-column: 1;
-    grid-row: 2;
-    justify-self: end;
+    position: absolute;
+    top: 14px;
+    right: 58px;
   }
 
   .compact-toggle {
-    grid-column: 2;
-    grid-row: 2;
+    position: absolute;
+    top: 14px;
+    right: 14px;
   }
 
   .bookmark-date {
@@ -664,17 +664,7 @@ h3 {
 }
 
 @media (max-width: 440px) {
-  .bookmark-compact {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .copy-button {
-    grid-column: 1;
-    justify-self: end;
-  }
-
-  .compact-toggle {
-    grid-column: 2;
-    grid-row: 2;
+  .bookmark-summary {
+    padding-right: 84px;
   }
 }
