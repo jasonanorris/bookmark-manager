@@ -58,6 +58,9 @@ Install dependencies:
 npm install
 ```
 
+The project expects Node 24 LTS. Use the system Node version or a version
+manager such as nvm; `.nvmrc` is set to `24`.
+
 Create local Worker secrets:
 
 ```bash
@@ -94,6 +97,13 @@ npm run test
 npm run build
 npm run build:extension
 npm run package:extension
+```
+
+Check the runtime and Wrangler versions used by npm scripts:
+
+```bash
+npm run env -- node --version
+npm run env -- wrangler --version
 ```
 
 ## Cloudflare Setup

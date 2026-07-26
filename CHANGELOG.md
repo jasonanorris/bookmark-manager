@@ -24,7 +24,14 @@ Initial personal-release version of Bookmark Manager.
 
 ### Known Follow-Ups
 
-- Update Wrangler from v3 to v4 and re-verify deployment.
 - Add pagination or load-more UI once the bookmark count grows beyond the current 100-item web load.
 - Add tag management tools for rename, delete, and merge workflows.
 - Consider a signed/self-distributed Firefox extension path if temporary installs become annoying.
+
+## Unreleased
+
+### Changed
+
+- Upgraded Wrangler from v3 to v4.
+- Upgraded Cloudflare Workers types to the v5 line required by Wrangler v4.
+- Added Node 24 LTS engine metadata and `.nvmrc`.
