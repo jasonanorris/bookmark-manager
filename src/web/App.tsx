@@ -562,8 +562,18 @@ export function App(): JSX.Element {
                         type="button"
                         className="secondary-button copy-button"
                         onClick={() => copyBookmarkUrl(bookmark)}
+                        aria-label={`Copy URL for ${displayTitle(bookmark)}`}
                       >
-                        {copiedBookmarkId === bookmark.id ? "Copied" : "Copy"}
+                        {copiedBookmarkId === bookmark.id ? (
+                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="m5 12 4 4L19 6" />
+                          </svg>
+                        ) : (
+                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <rect x="9" y="9" width="10" height="10" rx="2" />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
+                          </svg>
+                        )}
                       </button>
                       <button
                         type="button"
