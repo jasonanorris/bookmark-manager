@@ -523,7 +523,11 @@ h3 {
 @media (max-width: 760px) {
   .auth-shell,
   .app-shell {
-    padding: 14px;
+    padding: 18px 14px;
+  }
+
+  .app-shell {
+    gap: 16px;
   }
 
   .app-header,
@@ -537,12 +541,28 @@ h3 {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 12px;
+    align-items: start;
+    padding-bottom: 16px;
+  }
+
+  .app-header h1 {
+    font-size: 2.15rem;
+    line-height: 1;
+  }
+
+  .app-version {
+    margin-top: 8px;
+  }
+
+  .eyebrow {
+    margin-bottom: 6px;
   }
 
   .menu-toggle {
     display: inline-grid;
     width: 44px;
     min-width: 44px;
+    min-height: 44px;
     padding: 0;
     place-items: center;
   }
@@ -578,32 +598,52 @@ h3 {
     grid-template-columns: 1fr;
   }
 
+  .section-heading {
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+
+  .section-heading h2 {
+    margin-bottom: 0;
+  }
+
+  .bookmark-list {
+    gap: 10px;
+  }
+
   .bookmark-card {
-    padding: 12px;
+    padding: 12px 14px;
   }
 
   .bookmark-compact {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-columns: minmax(0, 1fr) 36px 36px;
     gap: 8px;
-    align-items: start;
+    align-items: center;
   }
 
   .bookmark-summary {
-    gap: 3px;
+    gap: 2px;
   }
 
   .bookmark-card h3 {
+    font-size: 1rem;
+    line-height: 1.25;
     white-space: normal;
   }
 
   .bookmark-url {
     font-size: 0.86rem;
+    line-height: 1.35;
     white-space: normal;
   }
 
+  .compact-toggle,
   .copy-button {
-    min-width: 38px;
+    width: 36px;
+    min-width: 36px;
+    min-height: 36px;
+    padding: 0;
   }
 
   .bookmark-date {
@@ -613,17 +653,17 @@ h3 {
 
 @media (max-width: 440px) {
   .bookmark-compact {
-    grid-template-columns: minmax(0, 1fr) 38px;
+    grid-template-columns: minmax(0, 1fr) 36px 36px;
   }
 
   .copy-button {
-    grid-column: 1 / -1;
-    justify-self: stretch;
-    order: 2;
+    grid-column: auto;
+    justify-self: auto;
+    order: 0;
   }
 
   .compact-toggle {
-    grid-column: 2;
+    grid-column: auto;
     grid-row: 1;
   }
 }
