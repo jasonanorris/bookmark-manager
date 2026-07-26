@@ -511,7 +511,7 @@ export function App(): JSX.Element {
       <section className="list-section" aria-labelledby="recent-title">
         <div className="section-heading">
           <h2 id="recent-title">Recent</h2>
-          {isLoading ? <p>Loading...</p> : <p>{bookmarks.length} shown</p>}
+          <p>{isLoading ? "Loading..." : `${bookmarks.length} shown`}</p>
         </div>
 
         {!isLoading && bookmarks.length === 0 ? (
