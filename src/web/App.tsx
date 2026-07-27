@@ -551,14 +551,6 @@ export function App(): JSX.Element {
                             {displayTitle(bookmark)}
                           </a>
                         </h3>
-                        <a
-                          className="bookmark-url"
-                          href={bookmark.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {bookmark.url}
-                        </a>
                       </div>
                       <button
                         type="button"
