@@ -583,7 +583,7 @@ export function App(): JSX.Element {
                     {isExpanded ? (
                       <div className="bookmark-details">
                         <div className="bookmark-meta">
-                          <p className="bookmark-host">{formatHostname(bookmark.url)}</p>
+                          <p className="bookmark-host">{bookmark.url}</p>
                           <p className="bookmark-date">{formatDate(bookmark.createdAt)}</p>
                         </div>
                         {bookmark.description ? (
@@ -778,14 +778,6 @@ function getErrorMessage(error: unknown): string {
 
 function displayTitle(bookmark: Bookmark): string {
   return bookmark.title || bookmark.url;
-}
-
-function formatHostname(url: string): string {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return url;
-  }
 }
 
 function formatDate(value: string): string {
