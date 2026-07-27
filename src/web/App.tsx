@@ -1,4 +1,13 @@
-import { ChangeEvent, FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  MouseEvent,
+  PointerEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from "react";
 import {
   ApiError,
   createBookmark,
@@ -46,6 +55,7 @@ export function App(): JSX.Element {
   const [expandedBookmarkIds, setExpandedBookmarkIds] = useState<Set<number>>(
     () => new Set()
   );
+  const [actionBookmark, setActionBookmark] = useState<Bookmark | null>(null);
   const [copiedBookmarkId, setCopiedBookmarkId] = useState<number | null>(null);
   const [form, setForm] = useState<BookmarkFormState>(emptyForm);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -58,11 +68,18 @@ export function App(): JSX.Element {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const importInputRef = useRef<HTMLInputElement | null>(null);
+  const longPressTimerRef = useRef<number | null>(null);
+  const longPressTriggeredRef = useRef(false);
+  const longPressStartPointRef = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     window.localStorage.setItem(themeStorageKey, theme);
   }, [theme]);
+
+  useEffect(() => {
+    return () => clearBookmarkPressTimer();
+  }, []);
 
   const availableTags = useMemo(() => {
     const tags = new Map<string, string>();
@@ -183,6 +200,96 @@ export function App(): JSX.Element {
 
       return nextIds;
     });
+  }
+
+  function expandBookmark(bookmarkId: number): void {
+    setExpandedBookmarkIds((currentIds) => {
+      const nextIds = new Set(currentIds);
+      nextIds.add(bookmarkId);
+      return nextIds;
+    });
+  }
+
+  function clearBookmarkPressTimer(): void {
+    if (longPressTimerRef.current === null) {
+      return;
+    }
+
+    window.clearTimeout(longPressTimerRef.current);
+    longPressTimerRef.current = null;
+    longPressStartPointRef.current = null;
+  }
+
+  function handleBookmarkPressStart(
+    bookmark: Bookmark,
+    event: PointerEvent<HTMLElement>
+  ): void {
+    if (event.pointerType === "mouse" || editingId === bookmark.id) {
+      return;
+    }
+
+    clearBookmarkPressTimer();
+    longPressTriggeredRef.current = false;
+    longPressStartPointRef.current = {
+      x: event.clientX,
+      y: event.clientY
+    };
+    longPressTimerRef.current = window.setTimeout(() => {
+      longPressTriggeredRef.current = true;
+      setActionBookmark(bookmark);
+    }, 550);
+  }
+
+  function handleBookmarkPressMove(event: PointerEvent<HTMLElement>): void {
+    const startPoint = longPressStartPointRef.current;
+
+    if (!startPoint) {
+      return;
+    }
+
+    const horizontalDistance = Math.abs(event.clientX - startPoint.x);
+    const verticalDistance = Math.abs(event.clientY - startPoint.y);
+
+    if (horizontalDistance > 10 || verticalDistance > 10) {
+      clearBookmarkPressTimer();
+    }
+  }
+
+  function handleBookmarkPressEnd(): void {
+    clearBookmarkPressTimer();
+  }
+
+  function handleBookmarkClickCapture(event: MouseEvent<HTMLElement>): void {
+    if (!longPressTriggeredRef.current) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    window.setTimeout(() => {
+      longPressTriggeredRef.current = false;
+    }, 0);
+  }
+
+  function handleBookmarkContextMenu(event: MouseEvent<HTMLElement>): void {
+    if (window.matchMedia("(pointer: coarse)").matches) {
+      event.preventDefault();
+    }
+  }
+
+  function openBookmark(bookmark: Bookmark): void {
+    window.open(bookmark.url, "_blank", "noopener,noreferrer");
+    setActionBookmark(null);
+  }
+
+  async function copyBookmarkFromActions(bookmark: Bookmark): Promise<void> {
+    await copyBookmarkUrl(bookmark);
+    setActionBookmark(null);
+  }
+
+  function expandBookmarkFromActions(bookmark: Bookmark): void {
+    expandBookmark(bookmark.id);
+    setActionBookmark(null);
   }
 
   async function copyBookmarkUrl(bookmark: Bookmark): Promise<void> {
@@ -529,7 +636,17 @@ export function App(): JSX.Element {
               const isExpanded = expandedBookmarkIds.has(bookmark.id);
 
               return (
-                <article className="bookmark-card" key={bookmark.id}>
+                <article
+                  className="bookmark-card"
+                  key={bookmark.id}
+                  onClickCapture={handleBookmarkClickCapture}
+                  onContextMenu={handleBookmarkContextMenu}
+                  onPointerCancel={handleBookmarkPressEnd}
+                  onPointerDown={(event) => handleBookmarkPressStart(bookmark, event)}
+                  onPointerLeave={handleBookmarkPressEnd}
+                  onPointerMove={handleBookmarkPressMove}
+                  onPointerUp={handleBookmarkPressEnd}
+                >
                   {editingId === bookmark.id ? (
                     <BookmarkForm
                       form={editForm}
@@ -633,7 +750,64 @@ export function App(): JSX.Element {
           </div>
         ) : null}
       </section>
+
+      {actionBookmark ? (
+        <BookmarkActionModal
+          bookmark={actionBookmark}
+          onClose={() => setActionBookmark(null)}
+          onCopy={() => copyBookmarkFromActions(actionBookmark)}
+          onExpand={() => expandBookmarkFromActions(actionBookmark)}
+          onOpen={() => openBookmark(actionBookmark)}
+        />
+      ) : null}
     </main>
+  );
+}
+
+interface BookmarkActionModalProps {
+  bookmark: Bookmark;
+  onClose: () => void;
+  onCopy: () => void;
+  onExpand: () => void;
+  onOpen: () => void;
+}
+
+function BookmarkActionModal({
+  bookmark,
+  onClose,
+  onCopy,
+  onExpand,
+  onOpen
+}: BookmarkActionModalProps): JSX.Element {
+  return (
+    <div className="bookmark-action-backdrop" onClick={onClose}>
+      <section
+        className="bookmark-action-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="bookmark-action-title"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div>
+          <h2 id="bookmark-action-title">{displayTitle(bookmark)}</h2>
+          <p className="bookmark-action-url">{bookmark.url}</p>
+        </div>
+        <div className="bookmark-action-buttons">
+          <button type="button" onClick={onOpen}>
+            Open
+          </button>
+          <button type="button" className="secondary-button" onClick={onCopy}>
+            Copy
+          </button>
+          <button type="button" className="secondary-button" onClick={onExpand}>
+            Expand
+          </button>
+          <button type="button" className="secondary-button" onClick={onClose}>
+            Cancel
+          </button>
+        </div>
+      </section>
+    </div>
   );
 }
 
