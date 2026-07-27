@@ -503,6 +503,23 @@ h3 {
   stroke-width: 2;
 }
 
+@media (hover: hover) and (pointer: fine) {
+  .bookmark-card .copy-button,
+  .bookmark-card .compact-toggle {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 120ms ease;
+  }
+
+  .bookmark-card:hover .copy-button,
+  .bookmark-card:hover .compact-toggle,
+  .bookmark-card:focus-within .copy-button,
+  .bookmark-card:focus-within .compact-toggle {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
 .card-actions {
   margin-top: 16px;
 }
