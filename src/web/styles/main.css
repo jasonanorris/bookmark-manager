@@ -366,10 +366,8 @@ h3 {
 }
 
 .bookmark-list {
-  overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--panel-bg);
+  display: grid;
+  gap: 2px;
 }
 
 .empty-state {
@@ -381,15 +379,8 @@ h3 {
 
 .bookmark-card {
   position: relative;
-  border-bottom: 1px solid var(--border);
   padding: 10px 14px;
-  transition:
-    background-color 120ms ease,
-    border-color 120ms ease;
-}
-
-.bookmark-card:last-child {
-  border-bottom: 0;
+  transition: background-color 120ms ease;
 }
 
 .bookmark-card:hover,
@@ -638,10 +629,6 @@ h3 {
 
   .section-heading h2 {
     margin-bottom: 0;
-  }
-
-  .bookmark-list {
-    border-radius: 8px;
   }
 
   .bookmark-card {
