@@ -523,113 +523,115 @@ export function App(): JSX.Element {
           </div>
         ) : null}
 
-        <div className="bookmark-list">
-          {bookmarks.map((bookmark) => {
-            const isExpanded = expandedBookmarkIds.has(bookmark.id);
+        {bookmarks.length > 0 ? (
+          <div className="bookmark-list">
+            {bookmarks.map((bookmark) => {
+              const isExpanded = expandedBookmarkIds.has(bookmark.id);
 
-            return (
-              <article className="bookmark-card" key={bookmark.id}>
-                {editingId === bookmark.id ? (
-                  <BookmarkForm
-                    form={editForm}
-                    submitLabel={isSaving ? "Saving..." : "Save Changes"}
-                    onChange={setEditForm}
-                    onSubmit={(event) => handleUpdate(event, bookmark.id)}
-                    onCancel={cancelEditing}
-                    disabled={isSaving}
-                  />
-                ) : (
-                  <>
-                    <div className="bookmark-compact">
-                      <div className="bookmark-summary">
-                        <h3>
-                          <a
-                            href={bookmark.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            {displayTitle(bookmark)}
-                          </a>
-                        </h3>
-                      </div>
-                      <button
-                        type="button"
-                        className="secondary-button copy-button"
-                        onClick={() => copyBookmarkUrl(bookmark)}
-                        aria-label={`Copy URL for ${displayTitle(bookmark)}`}
-                      >
-                        {copiedBookmarkId === bookmark.id ? (
-                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path d="m5 12 4 4L19 6" />
-                          </svg>
-                        ) : (
-                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <rect x="9" y="9" width="10" height="10" rx="2" />
-                            <path d="M5 15H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
-                          </svg>
-                        )}
-                      </button>
-                      <button
-                        type="button"
-                        className="secondary-button compact-toggle"
-                        onClick={() => toggleBookmarkExpanded(bookmark.id)}
-                        aria-expanded={isExpanded}
-                        aria-label={isExpanded ? "Minimize bookmark" : "Maximize bookmark"}
-                      >
-                        {isExpanded ? "-" : "+"}
-                      </button>
-                    </div>
-
-                    {isExpanded ? (
-                      <div className="bookmark-details">
-                        <div className="bookmark-meta">
-                          <p className="bookmark-host">{bookmark.url}</p>
-                          <p className="bookmark-date">{formatDate(bookmark.createdAt)}</p>
+              return (
+                <article className="bookmark-card" key={bookmark.id}>
+                  {editingId === bookmark.id ? (
+                    <BookmarkForm
+                      form={editForm}
+                      submitLabel={isSaving ? "Saving..." : "Save Changes"}
+                      onChange={setEditForm}
+                      onSubmit={(event) => handleUpdate(event, bookmark.id)}
+                      onCancel={cancelEditing}
+                      disabled={isSaving}
+                    />
+                  ) : (
+                    <>
+                      <div className="bookmark-compact">
+                        <div className="bookmark-summary">
+                          <h3>
+                            <a
+                              href={bookmark.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {displayTitle(bookmark)}
+                            </a>
+                          </h3>
                         </div>
-                        {bookmark.description ? (
-                          <p className="bookmark-description">{bookmark.description}</p>
-                        ) : null}
-                        {bookmark.tags.length > 0 ? (
-                          <div className="tag-list" aria-label="Tags">
-                            {bookmark.tags.map((tag) => (
-                              <button
-                                key={tag}
-                                type="button"
-                                className="tag-button"
-                                onClick={() => {
-                                  setSelectedTag(tag);
-                                  setIsSearchOpen(true);
-                                }}
-                              >
-                                {tag}
-                              </button>
-                            ))}
+                        <button
+                          type="button"
+                          className="secondary-button copy-button"
+                          onClick={() => copyBookmarkUrl(bookmark)}
+                          aria-label={`Copy URL for ${displayTitle(bookmark)}`}
+                        >
+                          {copiedBookmarkId === bookmark.id ? (
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                              <path d="m5 12 4 4L19 6" />
+                            </svg>
+                          ) : (
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                              <rect x="9" y="9" width="10" height="10" rx="2" />
+                              <path d="M5 15H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1" />
+                            </svg>
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          className="secondary-button compact-toggle"
+                          onClick={() => toggleBookmarkExpanded(bookmark.id)}
+                          aria-expanded={isExpanded}
+                          aria-label={isExpanded ? "Minimize bookmark" : "Maximize bookmark"}
+                        >
+                          {isExpanded ? "-" : "+"}
+                        </button>
+                      </div>
+
+                      {isExpanded ? (
+                        <div className="bookmark-details">
+                          <div className="bookmark-meta">
+                            <p className="bookmark-host">{bookmark.url}</p>
+                            <p className="bookmark-date">{formatDate(bookmark.createdAt)}</p>
                           </div>
-                        ) : null}
-                        <div className="card-actions">
-                          <button
-                            type="button"
-                            className="secondary-button"
-                            onClick={() => startEditing(bookmark)}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            type="button"
-                            className="danger-button"
-                            onClick={() => handleDelete(bookmark)}
-                          >
-                            Delete
-                          </button>
+                          {bookmark.description ? (
+                            <p className="bookmark-description">{bookmark.description}</p>
+                          ) : null}
+                          {bookmark.tags.length > 0 ? (
+                            <div className="tag-list" aria-label="Tags">
+                              {bookmark.tags.map((tag) => (
+                                <button
+                                  key={tag}
+                                  type="button"
+                                  className="tag-button"
+                                  onClick={() => {
+                                    setSelectedTag(tag);
+                                    setIsSearchOpen(true);
+                                  }}
+                                >
+                                  {tag}
+                                </button>
+                              ))}
+                            </div>
+                          ) : null}
+                          <div className="card-actions">
+                            <button
+                              type="button"
+                              className="secondary-button"
+                              onClick={() => startEditing(bookmark)}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              type="button"
+                              className="danger-button"
+                              onClick={() => handleDelete(bookmark)}
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ) : null}
-                  </>
-                )}
-              </article>
-            );
-          })}
-        </div>
+                      ) : null}
+                    </>
+                  )}
+                </article>
+              );
+            })}
+          </div>
+        ) : null}
       </section>
     </main>
   );
