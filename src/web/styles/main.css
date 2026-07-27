@@ -379,6 +379,7 @@ h3 {
 }
 
 .bookmark-card {
+  position: relative;
   transition:
     background-color 120ms ease,
     border-color 120ms ease;
@@ -399,6 +400,7 @@ h3 {
 
 .bookmark-summary {
   min-width: 0;
+  padding-right: 92px;
   flex: 1 1 auto;
 }
 
@@ -476,7 +478,10 @@ h3 {
 }
 
 .compact-toggle {
-  flex: 0 0 auto;
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
   width: 38px;
   min-width: 38px;
   min-height: 36px;
@@ -484,7 +489,10 @@ h3 {
 }
 
 .copy-button {
-  flex: 0 0 auto;
+  position: absolute;
+  top: 50%;
+  right: 62px;
+  transform: translateY(-50%);
   display: inline-grid;
   width: 38px;
   min-width: 38px;
@@ -627,7 +635,6 @@ h3 {
   }
 
   .bookmark-card {
-    position: relative;
     padding: 12px 14px;
   }
 
@@ -657,12 +664,14 @@ h3 {
     position: absolute;
     top: 14px;
     right: 58px;
+    transform: none;
   }
 
   .compact-toggle {
     position: absolute;
     top: 14px;
     right: 14px;
+    transform: none;
   }
 
   .bookmark-date {
