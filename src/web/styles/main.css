@@ -400,7 +400,7 @@ h3 {
 
 .bookmark-summary {
   min-width: 0;
-  padding-right: 92px;
+  padding-right: 76px;
   flex: 1 1 auto;
 }
 
@@ -482,28 +482,32 @@ h3 {
   top: 50%;
   right: 14px;
   transform: translateY(-50%);
-  width: 38px;
-  min-width: 38px;
-  min-height: 36px;
+  display: inline-grid;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  min-height: 30px;
   padding: 0;
+  place-items: center;
 }
 
 .copy-button {
   position: absolute;
   top: 50%;
-  right: 62px;
+  right: 52px;
   transform: translateY(-50%);
   display: inline-grid;
-  width: 38px;
-  min-width: 38px;
-  min-height: 36px;
+  width: 30px;
+  min-width: 30px;
+  height: 30px;
+  min-height: 30px;
   padding: 0;
   place-items: center;
 }
 
 .copy-button svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   fill: none;
   stroke: currentColor;
   stroke-linecap: round;
@@ -656,6 +660,7 @@ h3 {
   .copy-button {
     width: 36px;
     min-width: 36px;
+    height: 36px;
     min-height: 36px;
     padding: 0;
   }
